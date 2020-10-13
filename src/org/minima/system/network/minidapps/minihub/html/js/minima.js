@@ -12,11 +12,6 @@
 var MINIMA_WEBSOCKET = null;
 
 /**
- * GET or POST request parameters
- */
-var MINIMA_PARAMS = {};
-
-/**
  * Main MINIMA Object for all interaction
  */
 var Minima = {
@@ -51,13 +46,6 @@ var Minima = {
 	init : function(){
 		//Log a little..
 		Minima.log("Initialisation..");
-		
-		//Any Parameters..
-		var paramstring = window.location.protocol+"//"+window.location.hostname+":"+window.location.port+"/params";
-		httpGetAsync(paramstring, function(jsonresp){
-			//Set it..
-			MINIMA_PARAMS = jsonresp;	
-		});
 		
 		//Do the first call..
 		Minima.cmd("status;balance", function(json){
@@ -151,7 +139,7 @@ var Minima = {
 	
 	
 	/**
-	 * FILE Functions - no spaces allowed in filenames
+	 * FILE Functions
 	 */ 
 	file : {
 		
@@ -161,10 +149,6 @@ var Minima = {
 		
 		load : function(file, callback) {
 			MinimaRPC("file","load "+file,callback);
-		},
-		
-		move : function(file, newfile, callback) {
-			MinimaRPC("file","move "+file+" "+newfile,callback);
 		},
 		
 		list : function(file, callback) {
@@ -182,13 +166,8 @@ var Minima = {
 	 */
 	form : {
 		
-		//BOTH POST and GET parameters.. and any files are uploaded to /upload folder
-		params : function(paramname){
-			return MINIMA_PARAMS[paramname];
-		},
-		
-		//Return the GET parameter by scraping the location..
-		getParams : function(parameterName){
+		//Return the GET parameter..
+		get : function(parameterName){
 			    var result = null,
 		        tmp = [];
 			    var items = location.search.substr(1).split("&");
@@ -198,7 +177,8 @@ var Minima = {
 				   if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
 			    }
 			    return result;
-		}		
+		}
+		
 	},
 	
 	/**
@@ -333,7 +313,7 @@ function MinimaWebSocketListener(){
 		
 		//Send your name.. set automagically but can be hard set when debugging
 		MINIMA_WEBSOCKET.send(JSON.stringify(uid));
-			
+		
 	    //Send a message
 	    MinimaPostMessage("connected", "success");
 	};
