@@ -7,7 +7,12 @@ public class GlobalParams {
 	/**
 	 * Which Version
 	 */
-	public static final String MINIMA_VERSION = "0.96.9"; 
+	public static final String MINIMA_VERSION = "0.96.8"; 
+	
+	/**
+	 * Are we debugging the chain in short chain mode..
+	 */
+	public static final boolean SHORT_CHAIN_DEBUG_MODE = true; 
 	
 	/**
 	 * Number of seconds before sending a pulse message - every 10 minutes
@@ -15,9 +20,16 @@ public class GlobalParams {
 	public static final int USER_PULSE_FREQ      = 10 * 60;
 	
 	/**
-	 * Speed in blocks per second.. 0.05 = 20 second block time
+	 * Just create a block every transaction. Useful when not mining 
+	 * and just want a block every single transaction to debug.
+	 * Automatically disables the auto mining
 	 */
-	public static final MiniNumber MINIMA_BLOCK_SPEED  = new MiniNumber("0.5");
+	public static final boolean MINIMA_ZERO_DIFF_BLK  = false;
+	
+	/**
+	 * Speed in blocks per second.. 0.033 = 30 second block time
+	 */
+	public static final MiniNumber MINIMA_BLOCK_SPEED  = new MiniNumber("0.33");
 	
 	/**
 	 * MAX Difficulty change per block
@@ -27,7 +39,7 @@ public class GlobalParams {
 	/**
 	 * When checking speed and average difficulty only look at this many blocks back
 	 */
-	public static final MiniNumber MINIMA_BLOCKS_SPEED_CALC = new MiniNumber(512);
+	public static final MiniNumber MINIMA_BLOCKS_SPEED_CALC = new MiniNumber(8);
 	
 	/**
 	 * How deep before we think confirmed..
@@ -35,19 +47,19 @@ public class GlobalParams {
 	public static final MiniNumber MINIMA_CONFIRM_DEPTH  = new MiniNumber("3");
 	
 	/**
-	 * Depth before we cascade..
+	 * Depth before we cascade.. @ 30 seconds this is 7 days..
 	 */
-	public static final MiniNumber MINIMA_CASCADE_START_DEPTH = new MiniNumber(21000);
+	public static final MiniNumber MINIMA_CASCADE_START_DEPTH = new MiniNumber(16);
 	
 	/**
 	 * Number of blocks at each cascade level 
 	 */
-	public static final int MINIMA_CASCADE_LEVEL_NODES  = 256;
+	public static final int MINIMA_CASCADE_LEVEL_NODES  = 2;
 	
 	/**
 	 * How Many Cascade Levels
 	 */
-	public static final int MINIMA_CASCADE_LEVELS  = 21;
+	public static final int MINIMA_CASCADE_LEVELS  = 32;
 	
 	/**
 	 * Current default HASH_Strength Used. Can be up to 512.
@@ -55,17 +67,4 @@ public class GlobalParams {
 	 * can be set to less. This way signatures and addresses are shorter.
 	 */
 	public static final int MINIMA_DEFAULT_HASH_STRENGTH = 256;
-	
-	/**
-	 * Are we debugging the chain in short chain mode..
-	 */
-	public static final boolean SHORT_CHAIN_DEBUG_MODE = false;
-	
-	/**
-	 * Just create a block every transaction. Useful when not mining 
-	 * and just want a block every single transaction to debug.
-	 * Automatically disables the auto mining
-	 */
-	public static final boolean MINIMA_ZERO_DIFF_BLK  = false;
-	
 }
