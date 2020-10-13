@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
-import org.minima.objects.base.MiniData;
 import org.minima.objects.base.MiniString;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONObject;
@@ -20,8 +19,7 @@ public class CommsClient extends MessageProcessor {
 	public static final String COMMSCLIENT_START    = "COMMSCLIENT_START";
 	public static final String COMMSCLIENT_SHUTDOWN = "COMMSCLIENT_SHUTDOWN";
 	
-	public static final String COMMSCLIENT_RECMESSAGE  = "COMMSCLIENT_RECMESSAGE";
-	public static final String COMMSCLIENT_SENDMESSAGE = "COMMSCLIENT_SENDMESSAGE";
+	public static final String COMMSCLIENT_MESSAGE = "COMMSCLIENT_MESSAGE";
 	
 	//The main internal comms hub
 	CommsManager mCommsManager;
@@ -32,17 +30,15 @@ public class CommsClient extends MessageProcessor {
 	//Output streams
 	DataOutputStream mOutput;
 	
-	Thread 		       mInputThread;
-	CommsClientReader  mInputReader;
+	Thread 		    mInputThread;
+	CommsReader		mInputReader;
 	
-	//Create a UID
-	String mUID = MiniData.getRandomData(20).to0xString();
-			
+	//The UID
+	String mUID;
+	
 	//The Host and Port
 	String mHost;
 	int    mPort;
-	
-	boolean mBroadcast = false;
 	
 	/**
 	 * Constructor
@@ -58,26 +54,30 @@ public class CommsClient extends MessageProcessor {
 		//Store
 		mHost = zHost;
 		mPort = zPort;
-		mBroadcast = false;
 		
 		mCommsManager = zCommsManager;
+		
+		//Create a UID
+		mUID = ""+(new Random().nextLong());
 		
 		//Start the connection
 		PostMessage(COMMSCLIENT_INIT);
 	}
 	
-	public CommsClient(Socket zSock, int zActualPort, CommsManager zCommsManager) {
-		super("COMMSCLIENT");
+	public CommsClient(Socket zSock, CommsManager zCommsManager) {
+		super("NETCLIENT");
 		
 		//Store
 		mSocket 		= zSock;
-		mBroadcast      = true;
 		
 		//Store
 		mHost = mSocket.getInetAddress().getHostAddress();
-		mPort = zActualPort;
+		mPort = mSocket.getPort();
 		
 		mCommsManager = zCommsManager;
+		
+		//Create a UID
+		mUID = ""+(new Random().nextLong());
 		
 		//Start the system..
 		PostMessage(COMMSCLIENT_START);
@@ -95,10 +95,6 @@ public class CommsClient extends MessageProcessor {
 		return mPort;
 	}
 	
-	public boolean isBroadCast() {
-		return mBroadcast;
-	}
-	
 	public String getUID() {
 		return mUID;
 	}
@@ -109,7 +105,6 @@ public class CommsClient extends MessageProcessor {
 		ret.put("uid", mUID);
 		ret.put("host", getHost());
 		ret.put("port", getPort());
-		ret.put("broadcast", mBroadcast);
 		
 		return ret;
 	}
@@ -119,24 +114,17 @@ public class CommsClient extends MessageProcessor {
 		return toJSON().toString();
 	}
 	
-	public void shutdown() {
+	@Override
+	public void stopMessageProcessor() {
 		try {mOutput.close();}catch(Exception exc) {}
 		try {mInputThread.interrupt();}catch(Exception exc) {}
 		try {mSocket.close();}catch(Exception exc) {}
 		
-		stopMessageProcessor();
-	}
-	
-	public void postSend(String zMessage) {
-		Message msg = new Message(COMMSCLIENT_SENDMESSAGE);
-		msg.addString("message", zMessage);
-		PostMessage(msg);
+		super.stopMessageProcessor();
 	}
 	
 	@Override
 	protected void processMessage(Message zMessage) throws Exception {
-		
-		MinimaLogger.log("CommsClient "+mUID+" "+zMessage);
 		
 		if(zMessage.isMessageType(COMMSCLIENT_INIT)) {
 			try {
@@ -146,9 +134,10 @@ public class CommsClient extends MessageProcessor {
 				mSocket.connect(new InetSocketAddress(mHost, mPort), 60000);
 				
 			}catch (Exception e) {
-				MinimaLogger.log("COMMS: Error @ connection start : "+mHost+":"+mPort+" "+e);
+				MinimaLogger.log("Error @ connection start : "+mHost+":"+mPort+" "+e);
 				
-				shutdown();
+				// Error - let the handler know
+//				mNetworkMain.PostMessage(new Message(NetworkHandler.NETWORK_CLIENTERROR).addObject("client", this));
 				
 				return;
 			}	
@@ -157,28 +146,56 @@ public class CommsClient extends MessageProcessor {
 			PostMessage(COMMSCLIENT_START);
 			
 		}else if(zMessage.isMessageType(COMMSCLIENT_START)) {
+			
 			//Create the streams on this thread
 			mOutput 	= new DataOutputStream(mSocket.getOutputStream());
 			
 			//Start reading
-			mInputReader = new CommsClientReader(this);
-			mInputThread = new Thread(mInputReader, "CommsClientReader");
+			mInputReader = new CommsReader(this);
+			mInputThread = new Thread(mInputReader, "NetClientReader");
 			mInputThread.start();
+			
+//			//First thing to do..
+//			Message init = new Message(ConsensusNet.CONSENSUS_NET_INITIALISE);
+//			init.addObject("netclient", this);
+//			getMain().getConsensusHandler().PostMessage(init);
+//			
+//			//Latest communication..
+//			mLastPing = System.currentTimeMillis();
+//			
+//			//Send it again in a while..
+//			PostMessage(new Message(NETCLIENT_PULSE));
 		
-			//Post a message..
-			Message newclient = new Message(CommsManager.COMMS_NEWCLIENT);
-			newclient.addObject("client", this);
-			mCommsManager.PostMessage(newclient);
-			
-		}else if(zMessage.isMessageType(COMMSCLIENT_RECMESSAGE)) {
-			//Message received..
-			
-		}else if(zMessage.isMessageType(COMMSCLIENT_SENDMESSAGE)) {
-			String message = zMessage.getString("message");
-			sendMessage(new MiniString(message));
-			
+//		}else if(zMessage.isMessageType(NETCLIENT_PULSE)) {
+//			//When was the last PING message..
+//			long timenow = System.currentTimeMillis();
+//			long diff    = timenow - mLastPing;
+//			if(diff > PING_INTERVAL*2) {
+//				//Disconnect - Reconnect
+//				MinimaLogger.log("PING NOT RECEIVED IN TIME @ "+mHost+":"+mPort);
+//			
+//				//Disconnect..
+//				PostMessage(new Message(CommsClient.NETCLIENT_SHUTDOWN));
+//				return;
+//			}
+//			
+//			//Send a PULSE message..
+//			sendMessage(CommsReader.NETMESSAGE_PING, MiniByte.TRUE);
+//			
+//			//Send it again in a while..
+//			PostTimerMessage(new TimerMessage(PING_INTERVAL, NETCLIENT_PULSE));
+		
+//		}else if(zMessage.isMessageType(NETCLIENT_PING)) {
+//			//Received a PING message - This connection must still be working!
+//			mLastPing = System.currentTimeMillis();
+		
 		}else if(zMessage.isMessageType(COMMSCLIENT_SHUTDOWN)) {
-			shutdown();
+			
+			try {mOutput.close();}catch(Exception exc) {}
+			try {mInputThread.interrupt();}catch(Exception exc) {}
+			try {mSocket.close();}catch(Exception exc) {}
+			
+			stopMessageProcessor();
 		}
 	}
 	

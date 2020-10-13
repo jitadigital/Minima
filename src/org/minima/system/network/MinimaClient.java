@@ -183,12 +183,13 @@ public class MinimaClient extends MessageProcessor {
 		return toJSON().toString();
 	}
 	
-	public void shutdown() {
+	@Override
+	public void stopMessageProcessor() {
 		try {mOutput.close();}catch(Exception exc) {}
 		try {mInputThread.interrupt();}catch(Exception exc) {}
 		try {mSocket.close();}catch(Exception exc) {}
 		
-		stopMessageProcessor();
+		super.stopMessageProcessor();
 	}
 	
 	@Override
@@ -327,7 +328,12 @@ public class MinimaClient extends MessageProcessor {
 			mLastPing = System.currentTimeMillis();
 		
 		}else if(zMessage.isMessageType(NETCLIENT_SHUTDOWN)) {
-			shutdown();
+			
+			try {mOutput.close();}catch(Exception exc) {}
+			try {mInputThread.interrupt();}catch(Exception exc) {}
+			try {mSocket.close();}catch(Exception exc) {}
+			
+			stopMessageProcessor();
 		}
 	}
 	
