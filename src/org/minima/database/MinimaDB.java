@@ -312,15 +312,16 @@ public class MinimaDB {
 			 * Cascade the tree
 			 */
 			CascadeTree casc = new CascadeTree(mMainTree);
+			ArrayList<BlockTreeNode> removals = casc.cascadedTree();
 			
-			//Cascade the tree
-			casc.cascadedTree();
-			
-			//Get the removals
-			ArrayList<BlockTreeNode> removals = casc.getRemoved();
-			
-			//Get the Tree
+			//Set it
 			mMainTree = casc.getCascadeTree();
+			
+			//recurse up the tree.. copying all the parents for the MMRSet
+			mMainTree.getCascadeNode().getMMRSet().recurseParentMMR(oldcascade);
+				
+			//And Clear it.. no txbody required or mmrset..
+			mMainTree.clearCascadeBody();
 			
 			//Remove the deleted blocks..
 			for(BlockTreeNode node : removals) {
@@ -522,6 +523,9 @@ public class MinimaDB {
 		CascadeTree casc = new CascadeTree(mMainTree);
 		casc.cascadedTree();
 		mMainTree = casc.getCascadeTree();
+	
+		//And Clear it.. no txbody required or mmrset.. below cascade
+		mMainTree.clearCascadeBody();
 	}
 	
 	/**
