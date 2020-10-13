@@ -335,7 +335,7 @@ public class DAPPManager extends MessageProcessor {
 			
 			boolean reload = true;
 			if(zMessage.exists("reload")){
-				reload = zMessage.getBoolean("reload");
+				overwrite = zMessage.getBoolean("reload");
 			}
 
 			//Hash it..
