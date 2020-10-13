@@ -6,15 +6,17 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.minima.system.Main;
+import org.minima.system.SystemHandler;
 import org.minima.system.network.minidapps.DAPPManager;
+import org.minima.system.network.minidapps.comms.CommsManager;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONObject;
 import org.minima.utils.json.parser.JSONParser;
 import org.minima.utils.messages.Message;
-import org.minima.utils.messages.MessageProcessor;
+import org.minima.utils.messages.TimerMessage;
 import org.minima.utils.nanohttpd.protocols.websockets.CloseCode;
 
-public class WebSocketManager extends MessageProcessor {
+public class WebSocketManager extends SystemHandler {
 
 	/**
 	 * Message sent from the client..
@@ -42,7 +44,7 @@ public class WebSocketManager extends MessageProcessor {
 	 * @throws IOException 
 	 */
 	public WebSocketManager(Main zMain, int zPort) throws IOException {
-		super("WEBSOCKETMANAGER");
+		super(zMain,"WEBSOCKETMANAGER");
 		
 		mMinimaSockets = new Hashtable<>();
 		
@@ -142,7 +144,7 @@ public class WebSocketManager extends MessageProcessor {
 				replymsg.addString("message", (String)msgobj.get("message"));
 				
 				//Send it to the DAPP MANAGER
-				Main.getMainHandler().getNetworkHandler().getDAPPManager().PostMessage(replymsg);
+				getMainHandler().getNetworkHandler().getDAPPManager().PostMessage(replymsg);
 			}
 			
 		}else if(zMessage.getMessageType().equals(WEBSOCK_SEND)) {

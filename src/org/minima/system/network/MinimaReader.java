@@ -14,7 +14,6 @@ import org.minima.objects.greet.Greeting;
 import org.minima.objects.greet.HashNumber;
 import org.minima.objects.greet.SyncPackage;
 import org.minima.objects.greet.TxPoWList;
-import org.minima.system.Main;
 import org.minima.system.brains.ConsensusHandler;
 import org.minima.system.brains.ConsensusNet;
 import org.minima.utils.Crypto;
@@ -109,7 +108,7 @@ public class MinimaReader implements Runnable {
 			MiniByte msgtype = new MiniByte();
 			
 			//The Consensus
-			ConsensusHandler consensus = Main.getMainHandler().getConsensusHandler();
+			ConsensusHandler consensus = mNetClient.getNetworkHandler().getMainHandler().getConsensusHandler();
 			
 			while(true) {
 				//What message type

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Random;
 
 import org.minima.objects.TxPoW;
@@ -169,6 +171,10 @@ public class MinimaClient extends MessageProcessor {
 		return mNetworkMain;
 	}
 	
+	private Main getMain() {
+		return mNetworkMain.getMainHandler();
+	}
+	
 	public JSONObject toJSON() {
 		JSONObject ret = new JSONObject();
 		
@@ -227,7 +233,7 @@ public class MinimaClient extends MessageProcessor {
 			//First thing to do..
 			Message init = new Message(ConsensusNet.CONSENSUS_NET_INITIALISE);
 			init.addObject("netclient", this);
-			Main.getMainHandler().getConsensusHandler().PostMessage(init);
+			getMain().getConsensusHandler().PostMessage(init);
 			
 			//Latest communication..
 			mLastPing = System.currentTimeMillis();
