@@ -153,7 +153,7 @@ public class CommsClient extends MessageProcessor {
 			}catch (Exception e) {
 				MinimaLogger.log("COMMS: Error @ connection start : "+mHost+":"+mPort+" "+e);
 				
-				Message newclient = new Message(CommsManager.COMMS_CLIENTSHUT);
+				Message newclient = new Message(CommsManager.COMMS_CLIENTERROR);
 				newclient.addObject("client", this);
 				newclient.addString("error", mHost+":"+mPort+" "+e);
 				mCommsManager.PostMessage(newclient);
@@ -190,12 +190,10 @@ public class CommsClient extends MessageProcessor {
 			
 			//Pass it on..
 			JSONObject netaction = new JSONObject();
+			netaction.put("type", "client");
 			netaction.put("action", "message");
-			
 			netaction.put("port", getPort());
 			netaction.put("uid", getUID());
-			netaction.put("outboud", isOutBound());
-			
 			netaction.put("message", json);
 			
 			//Send it on..
@@ -209,14 +207,10 @@ public class CommsClient extends MessageProcessor {
 			shutdown();
 			
 			//And Notify the Manager..
-			Message clientshut = new Message(CommsManager.COMMS_CLIENTSHUT);
-			clientshut.addObject("client", this);
+//			Message clientshut = new Message(zMessageType) 
 			
-			mCommsManager.PostMessage(clientshut);
 		}
 	}
-	
-	
 	
 	/**
 	 * Send a message down the network
