@@ -687,7 +687,9 @@ public class ConsensusPrint extends ConsensusProcessor {
 					JSONObject newbalance = new JSONObject();
 					newbalance.put("event","newbalance");
 					newbalance.put("balance",totbal);
-					getConsensusHandler().PostDAPPJSONMessage(newbalance);
+					
+					Message msg = new Message(NetworkHandler.NETWORK_WS_NOTIFY).addObject("message", newbalance);
+					getConsensusHandler().getMainHandler().getNetworkHandler().PostMessage(msg);
 				}
 			}
 			
@@ -1012,7 +1014,9 @@ public class ConsensusPrint extends ConsensusProcessor {
 				newblock.put("event","newblock");
 				newblock.put("status",status);
 				newblock.put("txpow",tip.getTxPow());
-				getConsensusHandler().PostDAPPJSONMessage(newblock);
+				
+				Message msg = new Message(NetworkHandler.NETWORK_WS_NOTIFY).addObject("message", newblock);
+				getConsensusHandler().getMainHandler().getNetworkHandler().PostMessage(msg);
 			}
 			
 		}else if(zMessage.isMessageType(CONSENSUS_NETWORK)){
