@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.net.SocketException;
 
 import org.minima.utils.MinimaLogger;
-import org.minima.utils.messages.Message;
 
 public class CommsServer implements Runnable{
 
@@ -52,11 +51,6 @@ public class CommsServer implements Runnable{
 			
 			MinimaLogger.log("CommsServer started on port : "+mPort);
 		    
-			//Tell the Manager..
-			Message newserver = new Message(CommsManager.COMMS_NEWSERVER);
-			newserver.addObject("server", this);
-			mCommsManager.PostMessage(newserver);
-			
 			//Keep listening..
 			while(mRunning) {
 				//Listen in for connections
@@ -70,18 +64,25 @@ public class CommsServer implements Runnable{
 				rpcthread.start();
 			}
 			
-		} catch (Exception e) {
+		} catch (BindException e) {
+			//Socket shut down..
+			MinimaLogger.log("CommsServer : Port "+mPort+" already in use!.. ");
+			return;
+			
+		} catch (SocketException e) {
 			if(mRunning) {
 				//Socket shut down..
-				MinimaLogger.log("CommsServer : Socket ERROR .. "+e);
-				
-				//Tell the Manager..
-				Message newserver = new Message(CommsManager.COMMS_SERVERERROR);
-				newserver.addObject("server", this);
-				newserver.addObject("error", e.toString());
-				mCommsManager.PostMessage(newserver);
+				MinimaLogger.log("CommsServer : Socket Shutdown.. "+e);
+				return;
 			}
-		}	
+			
+		} catch (IOException e) {
+			MinimaLogger.log("CommsServer : "+e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+			return;
+		}
 		
 		//Socket shut down..
 		MinimaLogger.log("CommsServer stopped on port "+mPort);

@@ -11,7 +11,6 @@ import org.minima.objects.base.MiniData;
 import org.minima.objects.base.MiniString;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONObject;
-import org.minima.utils.json.parser.JSONParser;
 import org.minima.utils.messages.Message;
 import org.minima.utils.messages.MessageProcessor;
 
@@ -43,7 +42,7 @@ public class CommsClient extends MessageProcessor {
 	String mHost;
 	int    mPort;
 	
-	boolean mOutBound;
+	boolean mBroadcast = false;
 	
 	/**
 	 * Constructor
@@ -59,7 +58,7 @@ public class CommsClient extends MessageProcessor {
 		//Store
 		mHost = zHost;
 		mPort = zPort;
-		mOutBound = true;
+		mBroadcast = false;
 		
 		mCommsManager = zCommsManager;
 		
@@ -71,8 +70,8 @@ public class CommsClient extends MessageProcessor {
 		super("COMMSCLIENT");
 		
 		//Store
-		mSocket   = zSock;
-		mOutBound = false;
+		mSocket 		= zSock;
+		mBroadcast      = true;
 		
 		//Store
 		mHost = mSocket.getInetAddress().getHostAddress();
@@ -96,12 +95,8 @@ public class CommsClient extends MessageProcessor {
 		return mPort;
 	}
 	
-	public boolean isOutBound() {
-		return mOutBound;
-	}
-	
-	public boolean isInBound() {
-		return !mOutBound;
+	public boolean isBroadCast() {
+		return mBroadcast;
 	}
 	
 	public String getUID() {
@@ -114,7 +109,7 @@ public class CommsClient extends MessageProcessor {
 		ret.put("uid", mUID);
 		ret.put("host", getHost());
 		ret.put("port", getPort());
-		ret.put("outbound", mOutBound);
+		ret.put("broadcast", mBroadcast);
 		
 		return ret;
 	}
@@ -124,7 +119,7 @@ public class CommsClient extends MessageProcessor {
 		return toJSON().toString();
 	}
 	
-	private void shutdown() {
+	public void shutdown() {
 		try {mOutput.close();}catch(Exception exc) {}
 		try {mInputThread.interrupt();}catch(Exception exc) {}
 		try {mSocket.close();}catch(Exception exc) {}
@@ -153,13 +148,7 @@ public class CommsClient extends MessageProcessor {
 			}catch (Exception e) {
 				MinimaLogger.log("COMMS: Error @ connection start : "+mHost+":"+mPort+" "+e);
 				
-				Message newclient = new Message(CommsManager.COMMS_CLIENTERROR);
-				newclient.addObject("client", this);
-				newclient.addString("error", mHost+":"+mPort+" "+e);
-				mCommsManager.PostMessage(newclient);
-				
-				//Shut down the client..
-				PostMessage(CommsClient.COMMSCLIENT_SHUTDOWN);
+				shutdown();
 				
 				return;
 			}	
@@ -183,21 +172,6 @@ public class CommsClient extends MessageProcessor {
 			
 		}else if(zMessage.isMessageType(COMMSCLIENT_RECMESSAGE)) {
 			//Message received..
-			String msg = zMessage.getString("message");
-			
-			//Convert to a JSON - to clean up..
-			JSONObject json = (JSONObject) new JSONParser().parse(msg);
-			
-			//Pass it on..
-			JSONObject netaction = new JSONObject();
-			netaction.put("type", "client");
-			netaction.put("action", "message");
-			netaction.put("port", getPort());
-			netaction.put("uid", getUID());
-			netaction.put("message", json);
-			
-			//Send it on..
-			mCommsManager.postCommsMssage(netaction);
 			
 		}else if(zMessage.isMessageType(COMMSCLIENT_SENDMESSAGE)) {
 			String message = zMessage.getString("message");
@@ -205,10 +179,6 @@ public class CommsClient extends MessageProcessor {
 			
 		}else if(zMessage.isMessageType(COMMSCLIENT_SHUTDOWN)) {
 			shutdown();
-			
-			//And Notify the Manager..
-//			Message clientshut = new Message(zMessageType) 
-			
 		}
 	}
 	
@@ -229,7 +199,7 @@ public class CommsClient extends MessageProcessor {
 			MinimaLogger.log("COMMS Error sending message : "+zMessage.toString()+" "+ec);
 			
 			//Tell the network Handler
-			PostMessage(CommsClient.COMMSCLIENT_SHUTDOWN);
+			PostMessage(new Message(CommsClient.COMMSCLIENT_SHUTDOWN));
 		}
 	}	
 }
