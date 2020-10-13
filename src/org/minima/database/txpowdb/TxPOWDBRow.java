@@ -56,10 +56,4 @@ public interface TxPOWDBRow {
 	public JSONObject toJSON();
 	
 	public long getAddedTime();
-	
-	/**
-	 * Is this TxPoW Monotonic - do we need to recheck the Transaction Script given a different block..
-	 */
-	public boolean isMonoTonic();
-	public void setMonotonic(boolean zMonotonic);
 }
