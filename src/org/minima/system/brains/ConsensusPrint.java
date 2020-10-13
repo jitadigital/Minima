@@ -448,10 +448,7 @@ public class ConsensusPrint extends ConsensusProcessor {
 			}
 			
 			//Current top block
-			MiniNumber top = MiniNumber.ZERO;
-			if(getMainDB().getMainTree().getChainRoot() != null) {
-				top = getMainDB().getTopBlock();
-			}
+			MiniNumber top = getMainDB().getTopBlock();
 			
 			//A complete details of the TokenID..
 			Hashtable<String, JSONObject> full_details = new Hashtable<>();
@@ -866,13 +863,8 @@ public class ConsensusPrint extends ConsensusProcessor {
 			InputHandler.endResponse(zMessage, true, "");
 		
 		}else if(zMessage.isMessageType(CONSENSUS_TOPBLOCK)){
-			//Are we starting up..
-			TxPoW top = null;
-			if(getMainDB().getMainTree().getChainRoot() == null) {
-				top = new TxPoW();
-			}else {
-				top = getMainDB().getTopTxPoW();
-			}
+			//The Top block..
+			TxPoW top = getMainDB().getTopTxPoW();
 			
 			JSONObject resp = InputHandler.getResponseJSON(zMessage);
 			

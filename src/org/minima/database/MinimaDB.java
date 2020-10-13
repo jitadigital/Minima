@@ -599,9 +599,6 @@ public class MinimaDB {
 	
 	public ArrayList<Coin> getTotalSimpleSpendableCoins(MiniData zTokenID) {
 		ArrayList<Coin> confirmed   = new ArrayList<>();
-		if(getMainTree().getChainRoot() == null) {
-			return confirmed;
-		}
 		
 		MiniNumber top = getTopBlock();
 		
