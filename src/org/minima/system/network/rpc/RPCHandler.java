@@ -97,7 +97,11 @@ public class RPCHandler implements Runnable {
 			
 			//The final result
 			String finalresult = "";
-			String reqtype     = "";
+			
+			//CMD, SQL, FILE
+			String type        = "";
+			
+			//Request
 			String command     = "";
 			
 			// Currently we support only GET
@@ -112,12 +116,12 @@ public class RPCHandler implements Runnable {
 				command = URLDecoder.decode(new String(cbuf),"UTF-8").trim();
 				
 				//Remove slashes..
-				reqtype = new String(fileRequested);
-				if(reqtype.startsWith("/")) {
-					reqtype = reqtype.substring(1);
+				type = new String(fileRequested);
+				if(type.startsWith("/")) {
+					type = type.substring(1);
 				}
-				if(reqtype.endsWith("/")) {
-					reqtype = reqtype.substring(0,reqtype.length()-1);
+				if(type.endsWith("/")) {
+					type = type.substring(0,type.length()-1);
 				}
 				
 			}else if (method.equals("GET")){
@@ -129,15 +133,10 @@ public class RPCHandler implements Runnable {
 			
 				if(function.startsWith("sql/")) {
 					//Get the SQL function
-					reqtype="sql";
+					type="sql";
 					command = function.substring(4).trim();
-					
-				}else if(function.startsWith("file/")) {
-					reqtype="file";
-					command = function.substring(5).trim();
-					
 				}else {
-					reqtype="cmd";
+					type="cmd";
 					command = function.trim();
 				}
 			
@@ -149,7 +148,7 @@ public class RPCHandler implements Runnable {
 			//MinimaLogger.log("RPCHandler "+type+" "+command);
 			
 			//Is this a SQL function
-			if(reqtype.equals("sql")) {
+			if(type.equals("sql")) {
 				//Create a SQL object
 				SQL sql = new SQL(command, MiniDAPPID);
 				
@@ -159,7 +158,7 @@ public class RPCHandler implements Runnable {
 				//Get the Response..
             	finalresult = sql.getFinalResult();
 				
-			}else if(reqtype.equals("cmd")) {
+			}else if(type.equals("cmd")) {
 				CMD cmd = new CMD(command);
             	
             	//Run it..
@@ -167,11 +166,6 @@ public class RPCHandler implements Runnable {
  
             	//Get the Response..
             	finalresult = cmd.getFinalResult();
-			
-			}else if(reqtype.equals("file")) {
-				//File access..
-				//..
-				
 			}
 				
 			// send HTTP Headers
