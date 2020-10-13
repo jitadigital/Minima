@@ -107,11 +107,11 @@ public class NET implements Runnable {
 			comms.PostMessage(stopper);
 		
 		}else if(mCommand.startsWith("disconnect ")) {
-			String uid = strtok.nextToken();
+			String hostport = strtok.nextToken();
 			
 			//Stop this Comms Server
-			Message stopper = new Message(CommsManager.COMMS_DISCONNECT);
-			stopper.addString("uid", uid);
+			Message stopper = new Message(CommsManager.COMMS_CONNECT);
+			stopper.addString("hostport", hostport);
 			stopper.addString("minidappid", mMiniDAPPID);
 			
 			//Post it..
