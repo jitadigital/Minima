@@ -172,10 +172,14 @@ public class ConsensusBackup extends ConsensusProcessor {
 			ArrayList<SyncPacket> packets = sp.getAllNodes();
 			float syncsize = packets.size();
 			float tot = 0;
+			int lastprint=-1;
 			for(SyncPacket spack : packets) {
 				//Print some stuff..
-				int curr  = (int)( (tot++ / syncsize) *100);
-				getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALPERC).addString("info", "Checking DB.."+curr+"%"));
+				int curr   = (int)( (tot++/syncsize) *10);
+				if(curr != lastprint) {
+					lastprint = curr;
+					getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALPERC).addString("info", "Checking DB.."+(lastprint*10)+"%"));
+				}
 				
 				TxPoW txpow     = spack.getTxPOW();
 				MMRSet mmrset   = spack.getMMRSet();
@@ -223,10 +227,14 @@ public class ConsensusBackup extends ConsensusProcessor {
 			//Now sort
 			syncsize = list.size();
 			tot = 0;
+			lastprint=-1;
 			for(BlockTreeNode treenode : list) {
 				//Print some stuff..
-				int curr   = (int)( (tot++/syncsize) *100);
-				getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALPERC).addString("info", "Restoring DB.."+curr+"%"));
+				int curr   = (int)( (tot++/syncsize) *10);
+				if(curr != lastprint) {
+					lastprint = curr;
+					getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALPERC).addString("info", "Restoring DB.."+(lastprint*10)+"%"));
+				}
 				
 				//Get the Block
 				TxPoW txpow = treenode.getTxPow();
