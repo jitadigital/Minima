@@ -1,5 +1,7 @@
 package org.minima.system.brains;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Hashtable;
