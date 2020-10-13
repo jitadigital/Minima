@@ -43,7 +43,7 @@ public class ConsensusBackup extends ConsensusProcessor {
 	}
 	
 	private BackupManager getBackup() {
-		return Main.getMainHandler().getBackupManager();
+		return getConsensusHandler().getMainHandler().getBackupManager();
 	}
 	
 	public void processMessage(Message zMessage) throws Exception {
@@ -92,7 +92,7 @@ public class ConsensusBackup extends ConsensusProcessor {
 			if(shutdown) {
 				Message fullshut = new Message(Main.SYSTEM_FULLSHUTDOWN);
 				InputHandler.addResponseMesage(fullshut, zMessage);
-				Main.getMainHandler().PostMessage(fullshut);
+				getConsensusHandler().getMainHandler().PostMessage(fullshut);
 				MinimaLogger.log("Backup on shutdown fininshed..");
 			}else {
 				//respond..
@@ -111,14 +111,14 @@ public class ConsensusBackup extends ConsensusProcessor {
 			if(!backuser.exists()) {
 				//Not OK.. start fresh.. 
 				MinimaLogger.log("No User backups found.. @ "+backuser.getAbsolutePath());
-				Main.getMainHandler().PostMessage(Main.SYSTEM_INIT);
+				getConsensusHandler().getMainHandler().PostMessage(Main.SYSTEM_INIT);
 				return;
 			}
 			
 			if(!backsync.exists()) {
 				//Not OK.. start fresh.. 
 				MinimaLogger.log("No SyncPackage found.. @ "+backsync.getAbsolutePath());
-				Main.getMainHandler().PostMessage(Main.SYSTEM_INIT);
+				getConsensusHandler().getMainHandler().PostMessage(Main.SYSTEM_INIT);
 				return;
 			}
 			
@@ -267,7 +267,7 @@ public class ConsensusBackup extends ConsensusProcessor {
 			MinimaLogger.log("DB.. 100%");
 			
 			//Get on with it..
-			Main.getMainHandler().PostMessage(Main.SYSTEM_INIT);
+			getConsensusHandler().getMainHandler().PostMessage(Main.SYSTEM_INIT);
 		}
 	}
 	
