@@ -42,6 +42,11 @@ var Minima = {
 	block : 0,
 	
 	/** 
+	 * The TxPoWID of the current top block
+	 */
+	txpowid : "0x00",
+
+	/** 
 	 * The Full TxPoW Top Block
 	 */
 	txpow : {},
@@ -65,9 +70,6 @@ var Minima = {
 	
 	//Are we in DEBUG mode - if so don't touch the host settings..
 	debug : false,
-	
-	//Show mining messages
-	showmining : true,
 	
 	/**
 	 * Minima Startup - with the callback function used for all Minima messages
@@ -489,20 +491,10 @@ function MinimaWebSocketListener(){
 			}
 							
 		}else if(jmsg.event == "txpowstart"){
-			var info = { "transaction" : jmsg.transaction };
-			MinimaPostMessage("miningstart", info);
-		
-			if(Minima.showmining){
-				Minima.notify("Mining Transaction Started..","#55DD55");	
-			}
-				
+			Minima.notify("Mining Transaction Started..","#55DD55");	
+			
 		}else if(jmsg.event == "txpowend"){
-			var info = { "transaction" : jmsg.transaction };
-			MinimaPostMessage("miningstop", info);
-		
-			if(Minima.showmining){
-				Minima.notify("Mining Transaction Finished","#DD5555");
-			}
+			Minima.notify("Mining Transaction Finished","#DD5555");
 		}
 	};
 		
