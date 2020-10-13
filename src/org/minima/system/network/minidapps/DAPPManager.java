@@ -217,7 +217,6 @@ public class DAPPManager extends SystemHandler {
 	        
 	        ret.put("root", webroot);
 	        ret.put("approot", approot);
-	        ret.put("web", "http://"+mHost+":21000"+webroot);
 	        
 	        bis.close();
 	        fis.close();

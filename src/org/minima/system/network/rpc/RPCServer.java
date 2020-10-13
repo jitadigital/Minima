@@ -11,12 +11,16 @@ import org.minima.utils.MinimaLogger;
 
 public class RPCServer implements Runnable{
 
+	InputHandler mInputHandler;
+	
 	ServerSocket mServerSocket;
 	int mPort;
+//	String mHost;
 	
 	boolean mRunning = true;
 	
-	public RPCServer(int zPort) {
+	public RPCServer(InputHandler zInput, int zPort) {
+		mInputHandler = zInput;
 		mPort = zPort;
 		
 	    MinimaLogger.log("RPC Server started on port : "+mPort);
@@ -51,7 +55,7 @@ public class RPCServer implements Runnable{
 				Socket clientsock = mServerSocket.accept();
 				
 				//create a new RPC Handler ..
-				RPCHandler rpc = new RPCHandler(clientsock);
+				RPCHandler rpc = new RPCHandler(clientsock, mInputHandler);
 				
 				//Run in a new Thread
 				Thread rpcthread = new Thread(rpc, "RPC Client");
