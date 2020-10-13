@@ -399,12 +399,14 @@ public class NetworkHandler extends SystemHandler{
 	 */
 	public void addRequestedInitialSyncTxPow(String zTxPoWID) {
 		if(!isRequestedInitialTxPow(zTxPoWID)){
-			mRequestedTxPoW.add("INIT_"+zTxPoWID);
+			mRequestedTxPoW.add("INITIAL_"+zTxPoWID);	
+			
+			MinimaLogger.log("INitka ask : "+zTxPoWID);
 		}
 	}
 	
 	public boolean isRequestedInitialTxPow(String zTxPoWID) {
-		return mRequestedTxPoW.contains("INIT_"+zTxPoWID);
+		return mRequestedTxPoW.contains("INITIAL_"+zTxPoWID);
 	}
 	
 	public void addRequestedTxPow(String zTxPoWID) {
@@ -421,7 +423,7 @@ public class NetworkHandler extends SystemHandler{
 		//Remove link..
 		mRequestedTxPoW.remove(zTxPoWID);
 		//Just in case was an initial..
-		mRequestedTxPoW.remove("INIT_"+zTxPoWID);
+		mRequestedTxPoW.remove("INITIAL_"+zTxPoWID);
 	}
 	
 	public void clearAllrequestedTxPow() {
