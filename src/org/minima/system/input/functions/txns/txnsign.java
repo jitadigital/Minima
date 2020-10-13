@@ -18,7 +18,7 @@ public class txnsign extends CommandFunction {
 		
 		//Send to the consensus Handler
 		Message msg = getResponseMessage(ConsensusTxn.CONSENSUS_TXNSIGN);
-		msg.addInteger("transaction", txn);
+		msg.addInt("transaction", txn);
 		msg.addString("pubkey", PublicKey);
 		
 		getMainHandler().getConsensusHandler().PostMessage(msg);

@@ -213,15 +213,15 @@ public class Main extends MessageProcessor {
 		}else if ( zMessage.isMessageType(SYSTEM_INIT) ) {
 			//Start the network..	
 			Message netstart = new Message(NetworkHandler.NETWORK_STARTUP)
-									.addInteger("port", mPort)
-									.addInteger("rpcport", mRPCPort);
+									.addInt("port", mPort)
+									.addInt("rpcport", mRPCPort);
 			mNetwork.PostMessage(netstart);
 
 			//And do we do an automatic logon..
 			if(mAutoConnect) {
 				//Send a TimedMessage..
 				Message connect  = new Message(NetworkHandler.NETWORK_CONNECT)
-						.addInteger("port", mAutoPort).addString("host", mAutoHost);
+						.addInt("port", mAutoPort).addString("host", mAutoHost);
 				
 				getNetworkHandler().PostMessage(connect);
 			}

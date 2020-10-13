@@ -23,12 +23,12 @@ public class txninput extends CommandFunction {
 		
 		//Send to the consensus Handler
 		Message msg = getResponseMessage(ConsensusTxn.CONSENSUS_TXNINPUT);
-		msg.addInteger("transaction", txn);
+		msg.addInt("transaction", txn);
 		msg.addObject("coinid", cid);
 		
 		if(zInput.length>3) {
 			int position = Integer.parseInt(zInput[3]); 
-			msg.addInteger("position", position);
+			msg.addInt("position", position);
 		}
 		
 		getMainHandler().getConsensusHandler().PostMessage(msg);
