@@ -83,6 +83,11 @@ public class BackupManager extends MessageProcessor {
 	public void backupTxpow(TxPoW zTxPOW) {
 		//Create the File
 		File back = new File(mTxPOWDB,zTxPOW.getTxPowID().to0xString()+".txpow");
+
+		//does it already exist..
+		if(back.exists()) {
+			return;
+		}
 		
 		//Do in separate thread so returns fast
 		Message backup = new Message(BackupManager.BACKUP_WRITE);
@@ -118,9 +123,6 @@ public class BackupManager extends MessageProcessor {
 			
 			//Get the file
 			File ff = (File) zMessage.getObject("file");
-			if(ff.exists()) {
-				return;
-			}
 			
 			//Write..
 			MiniFile.writeObjectToFile(ff, stream);	
