@@ -411,6 +411,85 @@ public class BlockTree {
 		
 		_recurseTree(nodestates);
 	}
+		
+	/**
+	 * Deep Copy a Node and it's children
+	 * 
+	 * @param zStartNode
+	 * @return
+	 */
+	public static BlockTreeNode copyTreeNode(BlockTreeNode zStartNode) {
+		//Create a STACK..
+		NodeStack stack     = new NodeStack();
+		NodeStack stackcopy = new NodeStack();
+		
+		//Now loop..
+		BlockTreeNode curr     = zStartNode; 
+		curr.mTraversedChild   = 0;
+		
+		//The Copy..
+		BlockTreeNode rootcopy   = null;
+		BlockTreeNode currparent = null; 
+		BlockTreeNode currcopy   = null; 
+		
+        // traverse the tree 
+        while (curr != null || !stack.isEmpty()) { 
+        	while (curr !=  null) { 
+            	//Copy the Node..
+        		currcopy = new BlockTreeNode(curr);
+        		if(rootcopy == null) {
+        			rootcopy = currcopy;
+        		}
+        		if(currparent != null) {
+        			currparent.addChild(currcopy);
+        		}
+        		
+            	//Push on the stack..
+            	stack.push(curr); 
+            	stackcopy.push(currcopy);
+            	
+            	//Does it have children
+            	int childnum = curr.mTraversedChild;
+            	if(curr.getNumberChildren() > childnum) {
+                	curr.mTraversedChild++;
+                	
+                	//Keep as the parent..
+                	currparent = currcopy;
+                			
+                	curr = curr.getChild(childnum); 
+                	curr.mTraversedChild = 0;
+                }else {
+                	curr = null;
+                }
+            } 
+  
+            //Current must be NULL at this point
+            curr     = stack.peek();
+            currcopy = stackcopy.peek();
+            
+            //Get the next child..
+            int childnum = curr.mTraversedChild;
+        	if(curr.getNumberChildren() > childnum) {
+            	//Increment so next time a different child is chosen
+        		curr.mTraversedChild++;
+            	
+        		//Keep as the parent..
+            	currparent = currcopy;
+            	
+        		curr = curr.getChild(childnum); 
+            	curr.mTraversedChild = 0;
+            }else{
+            	//We've seen all the children.. remove from the stack
+            	stack.pop();
+            	stackcopy.pop();
+            	
+            	//Reset the current to null
+            	curr = null;
+            }
+        }
+        
+        return rootcopy;
+	}
 	
 	/**
 	 * Simple Printer
@@ -429,9 +508,17 @@ public class BlockTree {
 			}
 		}; 
 		
-		_recurseTree(printer);
+		_recurseTree2(printer);
 	}
 	
+	/**
+	 * Recurse the whole tree and ru an action..
+	 * 
+	 * return object if something special found..
+	 * 
+	 * @param zNodeAction
+	 * @return
+	 */
 	private BlockTreeNode _recurseTree(NodeAction zNodeAction) {
 		//If nothing on chain return nothing
 		if(getChainRoot() == null) {return null;}
@@ -439,8 +526,71 @@ public class BlockTree {
 		return _recurseTree(zNodeAction, getChainRoot());
 	}
 	
-	
 	private BlockTreeNode _recurseTree(NodeAction zNodeAction, BlockTreeNode zStartNode) {
+		//Create a STACK..
+		NodeStack stack = new NodeStack();
+		
+		//Now loop..
+		BlockTreeNode curr   = zStartNode; 
+		curr.mTraversedChild = 0;
+		
+        // traverse the tree 
+        while (curr != null || !stack.isEmpty()) { 
+        	while (curr !=  null) { 
+            	//Run the Action
+        		zNodeAction.runAction(curr);
+        		
+        		//Have we found what we were looking for..
+        		if(zNodeAction.returnObject()) {
+        			return zNodeAction.getObject();
+        		}
+            	
+            	//Push on the stack..
+            	stack.push(curr); 
+            	
+            	//Does it have children
+            	int childnum = curr.mTraversedChild;
+            	if(curr.getNumberChildren() > childnum) {
+                	curr.mTraversedChild++;
+                	curr = curr.getChild(childnum); 
+                	curr.mTraversedChild = 0;
+                }else {
+                	curr = null;
+                }
+            } 
+  
+            //Current must be NULL at this point
+            curr = stack.peek();
+        	
+            //Get the next child..
+            int childnum = curr.mTraversedChild;
+        	if(curr.getNumberChildren() > childnum) {
+            	//Increment so next time a different child is chosen
+        		curr.mTraversedChild++;
+            	curr = curr.getChild(childnum); 
+            	curr.mTraversedChild = 0;
+            }else{
+            	//We've seen all the children.. remove from the stack
+            	stack.pop();
+            	
+            	//Reset the current to null
+            	curr = null;
+            }
+        }
+        
+        return null;
+	}
+	
+	
+	private BlockTreeNode _recurseTree2(NodeAction zNodeAction) {
+		//If nothing on chain return nothing
+		if(getChainRoot() == null) {return null;}
+				
+		return _recurseTree2(zNodeAction, getChainRoot());
+	}
+	
+	
+	private BlockTreeNode _recurseTree2(NodeAction zNodeAction, BlockTreeNode zStartNode) {
 		//Create a STACK..
 		NodeStack stack = new NodeStack();
 		
@@ -468,16 +618,11 @@ public class BlockTree {
 			}
 		}
 		
+        
         return null;
 	}
 	
-	/**
-	 * Deep copy a node and it's children..
-	 * 
-	 * @param zStartNode
-	 * @return
-	 */
-	public static BlockTreeNode copyTreeNode(BlockTreeNode zStartNode) {
+	public static BlockTreeNode copyTreeNode2(BlockTreeNode zStartNode) {
 		//Create a STACK..
 		NodeStack stack     = new NodeStack();
 		NodeStack copystack = new NodeStack();
@@ -709,7 +854,7 @@ public class BlockTree {
 		System.out.println();
 		
 		//Lets copy..
-		BlockTreeNode copy = BlockTree.copyTreeNode(rootnode);
+		BlockTreeNode copy = BlockTree.copyTreeNode2(rootnode);
 		BlockTree copytree = new BlockTree();
 		copytree.setTreeRoot(copy);
 	
