@@ -176,7 +176,6 @@ public class NanoDAPPServer extends NanoHTTPD{
 					mDAPPManager.PostMessage(msg);
 		            
 	                return getOKResponse(installdapphtml.returnData(), "text/html");
-	                
 				}else if(fileRequested.startsWith("minidapps/")) {
 					String fullfile = mDAPPManager.getMiniDAPPSFolder()+"/"+fileRequested.substring(10);
 					byte[] file     = MiniFile.getFileBytes(fullfile);
