@@ -9,12 +9,12 @@ import org.minima.system.network.minidapps.DAPPManager;
 import org.minima.utils.MiniFile;
 import org.minima.utils.messages.Message;
 
-public class minidapps extends CommandFunction {
+public class minidapp extends CommandFunction {
 
-	public minidapps() {
-		super("minidapps");
+	public minidapp() {
+		super("minidapp");
 		
-		setHelp("(install:file|uninstall:UID|search:name|post:UID message|reload|list)", "Install, uninstall, search, reload, post a message directly or list the MiniDAPPs on your system.", "");
+		setHelp("(install:file|uninstall:UID|search:name|post:UID message|list)", "Install, uninstall, search, post a message directly or list the MiniDAPPs on your system.", "");
 	}
 	
 	@Override
@@ -77,9 +77,6 @@ public class minidapps extends CommandFunction {
 				getMainHandler().getNetworkHandler().getDAPPManager().PostMessage(post);
 		        
 				return;
-			
-			}else if(zInput[1].equals("reload")) {
-				msg.addString("action", "reload");
 				
 			}else if(zInput[1].equals("list")) {
 				msg.addString("action", "list");	
@@ -95,6 +92,6 @@ public class minidapps extends CommandFunction {
 	@Override
 	public CommandFunction getNewFunction() {
 		// TODO Auto-generated method stub
-		return new minidapps();
+		return new minidapp();
 	}
 }
