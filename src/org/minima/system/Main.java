@@ -17,7 +17,7 @@ import org.minima.utils.messages.MessageProcessor;
 public class Main extends MessageProcessor {
 
 	/**
-	 * Retrieve the Main handler.. from where you can retrieve everything else..
+	 * Retrieve the input handler.. used by the MiniLibs..
 	 */
 	private static Main mMainHandler;
 	public static Main getMainHandler() {
@@ -69,13 +69,16 @@ public class Main extends MessageProcessor {
 	public boolean mAutoConnect        = false;
 	ArrayList<String> mAutoConnectList = new ArrayList<>();
 	
+//	public String mAutoHost 	= "";
+//	public int mAutoPort    	= 0;
+	
 	/**
 	 * When did this node start up..
 	 */
 	long mNodeStartTime;
 	
 	/**
-	 * Main Constructor
+	 * Main COnstructor
 	 * @param zPort
 	 * @param zGenesis
 	 */
