@@ -35,12 +35,11 @@ import org.minima.utils.nanohttpd.protocols.http.NanoHTTPD;
 
 public class DAPPManager extends SystemHandler {
 
-	public static String DAPP_INSTALL   = "DAPP_INSTALL";
-	public static String DAPP_UNINSTALL = "DAPP_UNINSTALL";
-	public static String DAPP_UPDATE    = "DAPP_UPDATE";
+	public static String DAPP_INSTALL = "DAPP_INSTALL";
 	
 	JSONArray CURRENT_MINIDAPPS = new JSONArray();
 	String MINIDAPPS_FOLDER     = "";
+	
 	
 	ArrayList<NanoDAPPServer> mDAPPServers = new ArrayList<>();
 	
@@ -374,15 +373,6 @@ public class DAPPManager extends SystemHandler {
 	        
 	        //It's done!
 			recalculateMiniDAPPS();
-		
-		}else if(zMessage.getMessageType().equals(DAPP_UNINSTALL)) {
-			
-			
-		}else if(zMessage.getMessageType().equals(DAPP_UPDATE)) {
-			//Send a MinimaEvent Message to all the current Backend DAPPS
-			
-			
-		
 		}
 		
 	}

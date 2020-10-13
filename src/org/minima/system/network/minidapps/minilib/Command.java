@@ -116,10 +116,12 @@ public class Command implements Runnable {
 		
 //		//Run the function..
 //		MinimaLogger.log("RUN CMD "+mCommand);
+//		
 //		//And send a JSON msg..
 //		JSONObject newblock = new JSONObject();
 //		newblock.put("event", "newblock");
 //		newblock.put("status", "the status");
+//		
 //		mFinalResult = newblock.toString();
 		
 		//Now send the result back vis the callback..
