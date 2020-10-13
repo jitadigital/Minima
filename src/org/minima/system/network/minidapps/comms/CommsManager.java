@@ -97,7 +97,10 @@ public class CommsManager extends SystemHandler {
 			int port = zMessage.getInteger("port");
 		
 			//Now create one..
-			CommsServer server = new CommsServer(port, minidapp, this);
+			CommsServer server = new CommsServer(port, this);
+			
+			//JSONObject resp = InputHandler.getResponseJSON(zMessage);
+			InputHandler.endResponse(zMessage, true, "Server Started");
 			
 		}else if(zMessage.getMessageType().equals(COMMS_NEWSERVER)) {
 			//Get the Server
@@ -110,7 +113,7 @@ public class CommsManager extends SystemHandler {
 			JSONObject netaction = new JSONObject();
 			netaction.put("action", "server_start");
 			netaction.put("port", server.getPort());
-			postCommsMssage(netaction,zMessage.getString("minidappid"));
+			postCommsMssage(netaction);
 			
 		}else if(zMessage.getMessageType().equals(COMMS_SERVERERROR)) {
 			//Get the Server
@@ -124,11 +127,11 @@ public class CommsManager extends SystemHandler {
 			netaction.put("action", "server_error");
 			netaction.put("port", server.getPort());
 			netaction.put("error", zMessage.getString("error"));
-			postCommsMssage(netaction,zMessage.getString("minidappid"));
+			postCommsMssage(netaction);
 			
 		}else if(zMessage.getMessageType().equals(COMMS_STOP)) {
 			int port = zMessage.getInteger("port");
-			
+		
 			//Stop that server
 			CommsServer server = getServer(port);
 			if(server != null) {
@@ -141,7 +144,7 @@ public class CommsManager extends SystemHandler {
 				JSONObject netaction = new JSONObject();
 				netaction.put("action", "server_stop");
 				netaction.put("port", port);
-				postCommsMssage(netaction,zMessage.getString("minidappid"));
+				postCommsMssage(netaction);
 				
 				//And stop the clients..
 				for(CommsClient client : mClients) {
@@ -154,7 +157,7 @@ public class CommsManager extends SystemHandler {
 				JSONObject netaction = new JSONObject();
 				netaction.put("action", "server_notfound");
 				netaction.put("port", port);
-				postCommsMssage(netaction,zMessage.getString("minidappid"));
+				postCommsMssage(netaction);
 			}
 			
 		}else if(zMessage.getMessageType().equals(COMMS_CONNECT)) {
@@ -165,7 +168,7 @@ public class CommsManager extends SystemHandler {
 				JSONObject netaction = new JSONObject();
 				netaction.put("action", "error");
 				netaction.put("message", "inavlid host:port to connect to "+hostport);
-				postCommsMssage(netaction,zMessage.getString("minidappid"));
+				postCommsMssage(netaction);
 				return;
 			}
 			
@@ -183,7 +186,7 @@ public class CommsManager extends SystemHandler {
 			}
 			
 			//Start a new Client..
-			CommsClient client = new CommsClient(host, port, zMessage.getString("minidappid"), this);
+			CommsClient client = new CommsClient(host, port, this);
 		
 		}else if(zMessage.getMessageType().equals(COMMS_DISCONNECT)) {
 			String uid = zMessage.getString("uid");
@@ -242,28 +245,19 @@ public class CommsManager extends SystemHandler {
 		netaction.put("host", zClient.getHost());
 		netaction.put("port", zClient.getPort());
 		netaction.put("uid", zClient.getUID());
-		netaction.put("minidappid", zClient.getMiniDAPPID());
 		netaction.put("outbound", zClient.isOutBound());
 		
-		postCommsMssage(netaction, zClient.getMiniDAPPID());
+		postCommsMssage(netaction);
 	}
 	
-	public void postCommsMssage(JSONObject zMessage, String zMiniDAPPID) {
+	public void postCommsMssage(JSONObject zMessage) {
 		//someone has connected to a port you opened..
 		JSONObject newclient = new JSONObject();
 		newclient.put("event","network");
 		newclient.put("details",zMessage);
 		
-		Message msg = null;
-
-//		if(zMiniDAPPID.equals("")) {
-			msg = new Message(NetworkHandler.NETWORK_WS_NOTIFYALL);
-			msg.addString("message", newclient.toString());
-//		}else {
-//			msg = new Message(NetworkHandler.NETWORK_WS_NOTIFY_MINIDAPP);
-//			msg.addString("minidappid", newclient.toString());
-//			msg.addString("message", newclient.toString());
-//		}
+		Message msg = new Message(NetworkHandler.NETWORK_WS_NOTIFYALL);
+		msg.addString("message", newclient.toString());
 		
 		//Post to the Network..
 		getMainHandler().getNetworkHandler().PostMessage(msg);

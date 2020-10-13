@@ -45,8 +45,6 @@ public class CommsClient extends MessageProcessor {
 	
 	boolean mOutBound;
 	
-	String mMiniDAPPID;
-	
 	/**
 	 * Constructor
 	 * 
@@ -55,13 +53,12 @@ public class CommsClient extends MessageProcessor {
 	 * @throws IOException 
 	 * @throws UnknownHostException 
 	 */
-	public CommsClient(String zHost, int zPort, String zMiniDAPPID, CommsManager zCommsManager) {
+	public CommsClient(String zHost, int zPort, CommsManager zCommsManager) {
 		super("COMMSCLIENT");
 		
 		//Store
 		mHost = zHost;
 		mPort = zPort;
-		mMiniDAPPID = zMiniDAPPID;
 		mOutBound = true;
 		
 		mCommsManager = zCommsManager;
@@ -70,7 +67,7 @@ public class CommsClient extends MessageProcessor {
 		PostMessage(COMMSCLIENT_INIT);
 	}
 	
-	public CommsClient(Socket zSock, int zActualPort, String zMiniDAPPID, CommsManager zCommsManager) {
+	public CommsClient(Socket zSock, int zActualPort, CommsManager zCommsManager) {
 		super("COMMSCLIENT");
 		
 		//Store
@@ -80,7 +77,6 @@ public class CommsClient extends MessageProcessor {
 		//Store
 		mHost = mSocket.getInetAddress().getHostAddress();
 		mPort = zActualPort;
-		mMiniDAPPID = zMiniDAPPID;
 		
 		mCommsManager = zCommsManager;
 		
@@ -108,10 +104,6 @@ public class CommsClient extends MessageProcessor {
 		return !mOutBound;
 	}
 	
-	public String getMiniDAPPID() {
-		return mMiniDAPPID;
-	}
-	
 	public String getUID() {
 		return mUID;
 	}
@@ -122,7 +114,6 @@ public class CommsClient extends MessageProcessor {
 		ret.put("uid", mUID);
 		ret.put("host", getHost());
 		ret.put("port", getPort());
-		ret.put("minidappid", mMiniDAPPID);
 		ret.put("outbound", mOutBound);
 		
 		return ret;
@@ -164,7 +155,6 @@ public class CommsClient extends MessageProcessor {
 				
 				//Shut down the client..
 				Message shutdown = new Message(CommsClient.COMMSCLIENT_SHUTDOWN);
-				shutdown.addString("minidappid", mMiniDAPPID);
 				shutdown.addString("error", e.toString());
 				PostMessage(shutdown);
 				
@@ -185,9 +175,7 @@ public class CommsClient extends MessageProcessor {
 		
 			//Post a message..
 			Message newclient = new Message(CommsManager.COMMS_NEWCLIENT);
-			newclient.addString("minidappid", mMiniDAPPID);
 			newclient.addObject("client", this);
-			
 			mCommsManager.PostMessage(newclient);
 			
 		}else if(zMessage.isMessageType(COMMSCLIENT_RECMESSAGE)) {
@@ -204,11 +192,11 @@ public class CommsClient extends MessageProcessor {
 			netaction.put("port", getPort());
 			netaction.put("uid", getUID());
 			netaction.put("outboud", isOutBound());
-			netaction.put("minidappid", mMiniDAPPID);
+			
 			netaction.put("message", json);
 			
 			//Send it on..
-			mCommsManager.postCommsMssage(netaction,mMiniDAPPID);
+			mCommsManager.postCommsMssage(netaction);
 			
 		}else if(zMessage.isMessageType(COMMSCLIENT_SENDMESSAGE)) {
 			String message = zMessage.getString("message");
@@ -219,7 +207,6 @@ public class CommsClient extends MessageProcessor {
 			
 			//And Notify the Manager..
 			Message clientshut = new Message(CommsManager.COMMS_CLIENTSHUT);
-			clientshut.addString("minidappid", mMiniDAPPID);
 			clientshut.addObject("client", this);
 			
 			if(zMessage.exists("error")) {
@@ -250,7 +237,6 @@ public class CommsClient extends MessageProcessor {
 			
 			//Shut down the client..
 			Message shutdown = new Message(CommsClient.COMMSCLIENT_SHUTDOWN);
-			shutdown.addString("minidappid", mMiniDAPPID);
 			shutdown.addString("error", ec.toString());
 			PostMessage(shutdown);
 		}
