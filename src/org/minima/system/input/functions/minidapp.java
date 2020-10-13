@@ -40,7 +40,6 @@ public class minidapp extends CommandFunction {
 				
 				//And Post it..
 				Message installmsg = getResponseMessage(DAPPManager.DAPP_INSTALL);
-				installmsg.addObject("filename", ff.getName());
 				installmsg.addObject("minidapp", minidapp);
 				getMainHandler().getNetworkHandler().getDAPPManager().PostMessage(installmsg);
 		           
