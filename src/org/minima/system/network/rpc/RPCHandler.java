@@ -2,7 +2,6 @@ package org.minima.system.network.rpc;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -141,7 +140,8 @@ public class RPCHandler implements Runnable {
 				}
 			
 			}else {
-				throw new IOException("Unsupported Method in RPCHandler : "+firstline);
+				MinimaLogger.log("Unsupported Method in RPCHandler : "+firstline);
+				return;
 			}
 			
 			//MinimaLogger.log("RPCHandler "+method+" "+reqtype+" "+command);
@@ -176,6 +176,9 @@ public class RPCHandler implements Runnable {
 				//Get the Response..
             	finalresult = file.getFinalResult();
 			}
+			
+			//MinimaLogger.log("FINAL RESULT : "+finalresult);
+			
 			
 			// send HTTP Headers
 			out.println("HTTP/1.1 200 OK");
