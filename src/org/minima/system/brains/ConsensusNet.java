@@ -78,10 +78,6 @@ public class ConsensusNet extends ConsensusProcessor {
 		mFullSyncOnInit = zFull;
 	}
 	
-	public boolean isInitialSyncComplete() {
-		return mInitialSync;
-	}
-	
 	public void initialSyncComplete() {
 		if(!mInitialSync) {
 			mInitialSync = true;
