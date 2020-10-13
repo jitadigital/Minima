@@ -585,7 +585,9 @@ public class ConsensusNet extends ConsensusProcessor {
 			getMainDB().addNewTxPow(txpow);
 			
 			//Now - Process the TxPOW
-			Message newtxpow = new Message(ConsensusHandler.CONSENSUS_PROCESSTXPOW).addObject("txpow", txpow);
+			Message newtxpow = new Message(ConsensusHandler.CONSENSUS_PRE_PROCESSTXPOW).addObject("txpow", txpow);
+			
+			//Post it
 			getConsensusHandler().PostMessage(newtxpow);
 			
 			//Now check we have the parent.. (Whether or not it is a block we may be out of alignment..)
@@ -596,7 +598,7 @@ public class ConsensusNet extends ConsensusProcessor {
 				sendTxPowRequest(zMessage, parentID);
 			}
 			
-			//And now check the Txn list..
+			//And now check the Txn list.. basically a mempool sync
 			if(txpow.isBlock()) {
 				ArrayList<MiniData> txns = txpow.getBlockTransactions();
 				for(MiniData txn : txns) {
