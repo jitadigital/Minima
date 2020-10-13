@@ -12,6 +12,7 @@ public class DataTimer {
 	public boolean checkForData(String zData, long zMaxTime) {
 		//Current time..
 		long timenow     = System.currentTimeMillis();
+		int tot = 0;
 		
 		//Remove the old..
 		Hashtable<String, Long> newData = new Hashtable<>();
@@ -25,6 +26,9 @@ public class DataTimer {
 			long diff    = timenow - time;
 			if(diff < zMaxTime) {
 				newData.put(key, timeval);
+			}else {
+				//It's being removed..
+				tot++;
 			}
 		}
 		
@@ -32,11 +36,11 @@ public class DataTimer {
 		mTimedData = newData;
 		
 		//Do we send this.. ?
-		boolean found = (mTimedData.get(zData) == null);
-		if(!found) {
+		boolean sender = (mTimedData.get(zData) == null);
+		if(sender) {
 			mTimedData.put(zData, new Long(timenow));	
 		}
 		
-		return found;
+		return sender;
 	}
 }
