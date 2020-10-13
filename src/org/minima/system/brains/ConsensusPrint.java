@@ -1011,7 +1011,7 @@ public class ConsensusPrint extends ConsensusProcessor {
 				JSONObject newblock = new JSONObject();
 				newblock.put("event","newblock");
 				newblock.put("status",status);
-				newblock.put("txpow",tip.getTxPow().toJSON());
+				newblock.put("txpow",tip.getTxPow());
 				getConsensusHandler().PostDAPPJSONMessage(newblock);
 			}
 			
