@@ -322,8 +322,6 @@ public class DAPPManager extends MessageProcessor {
 			mdapps.put("minidapps", CURRENT_MINIDAPPS);
 			InputHandler.endResponse(zMessage, true, "MiniDAPPs reloaded");
 			
-			Main.getMainHandler().getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_DAPP_RELOAD));
-			
 		}else if(zMessage.getMessageType().equals(DAPP_INSTALL)) {
 			//Get the Data
 			MiniData data = (MiniData) zMessage.getObject("minidapp");
@@ -438,10 +436,6 @@ public class DAPPManager extends MessageProcessor {
 	        }
 	        
 			InputHandler.endResponse(zMessage, true, "MiniDAPP installed..");
-			
-			//Notify those listening..
-			Main.getMainHandler().getConsensusHandler()
-				.updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_DAPP_INSTALLED).addString("name", filename));
 			
 		}else if(zMessage.getMessageType().equals(DAPP_UNINSTALL)) {
 			String minidapp = zMessage.getString("minidapp");
