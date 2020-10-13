@@ -1,12 +1,8 @@
 package org.minima.system.network;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Enumeration;
 
 import org.minima.system.Main;
 import org.minima.system.SystemHandler;
@@ -40,10 +36,10 @@ public class NetworkHandler extends SystemHandler{
 	
 	public static final String NETWORK_WEBPROXY 	= "NETWORK_WEBPROXY";
 	
-	public static final String NETWORK_WS_NOTIFY 	= "NETWORK_NOTIFY";
+	public static final String NETWORK_WS_NOTIFY 		= "NETWORK_NOTIFY";
 	
 	/**
-	 * The Main Minima Server
+	 * The  server listening for clients..
 	 */
 	MinimaServer mServer;
 	
@@ -73,102 +69,30 @@ public class NetworkHandler extends SystemHandler{
 	boolean mGlobalReconnect = true;
 	
 	/**
-	 * HARD SET THE HOST
+	 * Which Host for the Minima Web MiFi Proxy
 	 */
-	boolean mHardSet = false;
-	String mHost     = "";
+	String mMifiProxy = "http://mifi.minima.global:9000/";
 	
 	/**
-	 * The Main Minima port - all other ports are added to this one..
-	 * 
-	 * So you can specify just one port per client.
+	 * HARD SET THE HOST
 	 */
-	int mBasePort;
+	String mHost = "";
 	
 	/**
 	 * 
 	 * @param zMain
 	 */
-	public NetworkHandler(Main zMain, String zHost, int zMainPort) {
+	public NetworkHandler(Main zMain, String zHost) {
 		super(zMain,"NETWORK");
-
-		if(zHost.equals("")) {
-			mHardSet = false;
-			setHostIP();
-		}else {
-			mHardSet = true;
-			mHost    = zHost;
-		}
 		
-		//The base port all the other ports are derived from
-		mBasePort = zMainPort;
-	}
-	
-	public String getBaseHost() {
-		return mHost;
-	}
-	
-	public int getBasePort() {
-		return mBasePort;
-	}
-	
-	public int getMinimaPort() {
-		return mBasePort;
-	}
-	
-	public int getRPCPort() {
-		return mBasePort+1;
-	}
-	
-	public int getWSPort() {
-		return mBasePort+2;
-	}
-	
-	public int getMiniDAPPServerPort() {
-		return mBasePort+3;
-	}
-	
-	public String setHostIP() {
-		if(mHardSet) {
-			return mHost;
-		}
+		//Hard set the Host
+		mHost = zHost;
 		
-		mHost = "127.0.0.1";
-		try {
-			boolean found = false;
-		    Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-	        while (!found && interfaces.hasMoreElements()) {
-	            NetworkInterface iface = interfaces.nextElement();
-	            // filters out 127.0.0.1 and inactive interfaces
-	            if (iface.isLoopback() || !iface.isUp())
-	                continue;
-
-	            Enumeration<InetAddress> addresses = iface.getInetAddresses();
-	            while(!found && addresses.hasMoreElements()) {
-	                InetAddress addr = addresses.nextElement();
-	                String ip   = addr.getHostAddress();
-	                String name = iface.getDisplayName();
-	                
-	                //Only get the IPv4
-	                if(!ip.contains(":")) {
-	                	mHost = ip;
-	                	
-	                	//If you're on WiFi..
-	                	if(name.startsWith("wl")) {
-	                		found = true;
-	                		break;
-	                	}
-	                }
-	            }
-	        }
-	    } catch (SocketException e) {
-	        MinimaLogger.log("getHostIP : "+e);
-	    }
+		//Send a reconnect message every 1/2 hour..
 		
-		return mHost;
 	}
 	
-	public MinimaServer getMinimaServer() {
+	public MinimaServer getServer() {
 		return mServer;
 	}
 	
@@ -182,7 +106,14 @@ public class NetworkHandler extends SystemHandler{
 	
 	public WebSocketManager getWebSocketManager() {
 		return mWebSocketManager;
-	}	
+	}
+
+	public void setProxy(String zProxy) {
+		mMifiProxy = zProxy; 
+		if(!mMifiProxy.endsWith("/")) {
+			mMifiProxy +="/";
+		}
+	}
 	
 	public void setGlobalReconnect(boolean zGlobalReconnect) {
 		mGlobalReconnect = zGlobalReconnect;
@@ -194,23 +125,30 @@ public class NetworkHandler extends SystemHandler{
 		if(zMessage.isMessageType(NETWORK_STARTUP)) {
 			MinimaLogger.log("Network Startup..");
 			
+			//Get the port
+			int port 	= zMessage.getInteger("port");
+			int rpcport = zMessage.getInteger("rpcport");
+			
 			//Start the network Server
-			mServer = new MinimaServer(this,getMinimaPort());
+			mServer = new MinimaServer(this,port);
 			Thread multimain = new Thread(mServer, "Multi Server");
 			multimain.setDaemon(true);
 			multimain.start();
 			
 			//Start the RPC server
-			mRPCServer = new RPCServer(getRPCPort());
+			mRPCServer = new RPCServer(rpcport);
 			Thread rpc = new Thread(mRPCServer, "RPC Server");
 			rpc.setDaemon(true);
 			rpc.start();
 			
 			//Start the DAPP Server
-			mDAPPManager = new DAPPManager(getMainHandler());
+			mDAPPManager = new DAPPManager(getMainHandler(), mHost, 21000, rpcport);
 			
 			//Start the WebSocket Manager
-			mWebSocketManager = new WebSocketManager(getMainHandler(), getWSPort());
+			mWebSocketManager = new WebSocketManager(getMainHandler(), 20999);
+			
+			//Log it..
+			MinimaLogger.log("MiFi proxy set : "+mMifiProxy);
 			
 		}else if(zMessage.isMessageType(NETWORK_SHUTDOWN)) {
 			//Stop the server
@@ -243,31 +181,31 @@ public class NetworkHandler extends SystemHandler{
 			mWebSocketManager.PostMessage(msg);
 			
 		}else if(zMessage.isMessageType(NETWORK_WEBPROXY)) {
-//			//Connect to a web proxy and listen for RPC calls..
-//			String uuid 	= zMessage.getString("uuid");
-//			
-//			//Create the IP
-// 			String ip = uuid+"#"+getDAPPManager().getHostIP()+":"+getRPCServer().getPort();
-//			
-//			//Call the Minima Proxy - this should be user definable..#TODO
-//			String url = mMifiProxy+URLEncoder.encode(ip, "UTF-8");
-//		
-//			//Call it..
-//			String resp ="";
-//			try {
-//				resp = RPCClient.sendGET(url);
-//			}catch(IOException exc) {
-//				//Tell the user
-//				InputHandler.getResponseJSON(zMessage).put("url", url);
-//				InputHandler.getResponseJSON(zMessage).put("resp", exc);
-//				InputHandler.endResponse(zMessage, true,"");
-//				return;
-//			}
-//			
-//			//Tell the user
-//			InputHandler.getResponseJSON(zMessage).put("url", url);
-//			InputHandler.getResponseJSON(zMessage).put("resp", resp);
-//			InputHandler.endResponse(zMessage, true,"");
+			//Connect to a web proxy and listen for RPC calls..
+			String uuid 	= zMessage.getString("uuid");
+			
+			//Create the IP
+ 			String ip = uuid+"#"+getDAPPManager().getHostIP()+":"+getRPCServer().getPort();
+			
+			//Call the Minima Proxy - this should be user definable..#TODO
+			String url = mMifiProxy+URLEncoder.encode(ip, "UTF-8");
+		
+			//Call it..
+			String resp ="";
+			try {
+				resp = RPCClient.sendGET(url);
+			}catch(IOException exc) {
+				//Tell the user
+				InputHandler.getResponseJSON(zMessage).put("url", url);
+				InputHandler.getResponseJSON(zMessage).put("resp", exc);
+				InputHandler.endResponse(zMessage, true,"");
+				return;
+			}
+			
+			//Tell the user
+			InputHandler.getResponseJSON(zMessage).put("url", url);
+			InputHandler.getResponseJSON(zMessage).put("resp", resp);
+			InputHandler.endResponse(zMessage, true,"");
 			
 		}else if(zMessage.isMessageType(NETWORK_CONNECT)) {
 			String host = zMessage.getString("host");

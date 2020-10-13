@@ -24,7 +24,6 @@ import org.minima.objects.base.MiniData;
 import org.minima.system.Main;
 import org.minima.system.SystemHandler;
 import org.minima.system.input.InputHandler;
-import org.minima.system.network.NetworkHandler;
 import org.minima.system.network.minidapps.comms.CommsManager;
 import org.minima.system.network.minidapps.minihub.hexdata.minimajs;
 import org.minima.utils.Crypto;
@@ -54,36 +53,39 @@ public class DAPPManager extends SystemHandler {
 	//The Edited minima.js file..
 	byte[] mMINIMAJS = new byte[0];
 	
-	//The old HOST..
-	String mOldHost = "";
-	int mBasePort   = 0;
+	//HOST  - this will be inserted into the minima.js file
+	String mHost = "";	
+	boolean mHardSet = false;
+	int mRPCPort;
 	
-	NetworkHandler mNetwork;
-	
-	public DAPPManager(Main zMain) {
+	public DAPPManager(Main zMain, String zHost, int zPort, int zRPCPort) {
 		super(zMain, "DAPPMAnager");
 		
-		//Need access to this
-		mNetwork = getMainHandler().getNetworkHandler();
-		
-		//What is the current Host
-		mOldHost  = mNetwork.getBaseHost();
-		mBasePort = mNetwork.getBasePort();
-				
 		mCommsManager = new CommsManager(zMain);
 		
-		//Now create the Minima JS file..
-	    recalculateMinimaJS();
+		//Correct HOST from RPC server
+		mRPCPort = zRPCPort;
+		
+		mHost = "127.0.0.1";
+		if(!zHost.equals("")) {
+			mHardSet = true;
+			mHost = zHost;
+		}
+		
+		//Calculate the HOST
+		getHostIP();
+	
+	    //Now create the Minima JS file..
+	    recalculateMinimaJS(mHost,mRPCPort);
 	    
 		//Calculate the current MiniDAPPS
 		recalculateMiniDAPPS();
 		
-		mDAPPServer = new DAPPServer(mNetwork.getMiniDAPPServerPort(), this);
+		mDAPPServer = new DAPPServer(zPort, this);
 		try {
 			mDAPPServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-			MinimaLogger.log("MiniDAPP server started on por "+mNetwork.getMiniDAPPServerPort());
+			MinimaLogger.log("MiniDAPP server started on "+mHost+":"+zPort);
 		} catch (IOException e) {
-			MinimaLogger.log(e.toString());
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -92,9 +94,48 @@ public class DAPPManager extends SystemHandler {
 	public CommsManager getCommsManager() {
 		return mCommsManager;
 	}
-
 	
-	public void recalculateMinimaJS() {
+	public String getHostIP() {
+		if(mHardSet) {
+			return mHost;
+		}
+		
+		String host = "127.0.0.1";
+		try {
+			boolean found = false;
+		    Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+	        while (!found && interfaces.hasMoreElements()) {
+	            NetworkInterface iface = interfaces.nextElement();
+	            // filters out 127.0.0.1 and inactive interfaces
+	            if (iface.isLoopback() || !iface.isUp())
+	                continue;
+
+	            Enumeration<InetAddress> addresses = iface.getInetAddresses();
+	            while(!found && addresses.hasMoreElements()) {
+	                InetAddress addr = addresses.nextElement();
+	                String ip   = addr.getHostAddress();
+	                String name = iface.getDisplayName();
+	                
+	                //Only get the IPv4
+	                if(!ip.contains(":")) {
+	                	host = ip;
+	                	
+	                	//If you're on WiFi..
+	                	if(name.startsWith("wl")) {
+	                		found = true;
+	                		break;
+	                	}
+	                }
+	            }
+	        }
+	    } catch (SocketException e) {
+	        System.out.println("DAPPMAnager getHostIP : "+e);
+	    }
+		
+		return host;
+	}
+	
+	public void recalculateMinimaJS(String zHost, int zPort) {
 		//Now create the Minima JS file..
 	    try {
 			//Get the bytes..
@@ -102,38 +143,40 @@ public class DAPPManager extends SystemHandler {
 		
 	    	//create a string..
 	    	String minstring = new String(minima, Charset.forName("UTF-8"));
-	    	
-	    	//What is the RPC address
-	    	String rpcaddress = mOldHost+":"+mNetwork.getRPCPort();
-	    	
-	    	//Now replace the RPC connect address..
-		    String editstring = minstring.replace("127.0.0.1:9002",rpcaddress);
+	    
+	    	//Now replace the center string..
+		    String editstring = minstring.replace("var MINIMA_MINIDAPP_HOST = \"127.0.0.1:8999\";", 
+										    	  "var MINIMA_MINIDAPP_HOST = \""+zHost+":"+zPort+"\";");
 	 
-		    //What is the WebSocket address
-	    	String wsaddress = mOldHost+":"+mNetwork.getWSPort();
-	    	
-		    //Replace the Web Socket Server IP..
-		    editstring = editstring.replace("127.0.0.1:9003",wsaddress);
+		    //Replace the Websocket Server IP..
+		    editstring = editstring.replace("ws://127.0.0.1:20999", "ws://"+zHost+":20999");
+			
+		    //It's a MiniDAPP
+		    editstring = editstring.replace("var MINIMA_IS_MINIDAPP = false;", 
+		    		                        "var MINIMA_IS_MINIDAPP = true;");
 			
 		    //Now convert to bytes..
 		    mMINIMAJS = editstring.getBytes();
 	    
-		    //MinimaLogger.log(editstring);
-		    
 	    } catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	//Use the RPC server for now..
+	public String getCurrentHost() {
+		return mHost;
+	}
+	
 	public byte[] getMinimaJS() {
-//		//Check if the Host has changed..
-//		String host = getHostIP();
-//		if(!host.equals(mHost)) {
-//			MinimaLogger.log("MINIDAPP RPCHOST CHANGED from "+mHost+" to "+host);
-//			mHost = host;
-//			recalculateMinimaJS(mHost,mRPCPort);
-//		}
+		//Check if the Host has changed..
+		String host = getHostIP();
+		if(!host.equals(mHost)) {
+			MinimaLogger.log("MINIDAPP RPCHOST CHANGED from "+mHost+" to "+host);
+			mHost = host;
+			recalculateMinimaJS(mHost,mRPCPort);
+		}
 		
 		return mMINIMAJS;
 	}
@@ -185,7 +228,7 @@ public class DAPPManager extends SystemHandler {
 	        
 	        ret.put("root", webroot);
 	        ret.put("approot", approot);
-	        ret.put("web", "http://"+mNetwork.getBaseHost()+":"+mNetwork.getMiniDAPPServerPort()+webroot);
+	        ret.put("web", "http://"+mHost+":21000"+webroot);
 	        
 	        bis.close();
 	        fis.close();
