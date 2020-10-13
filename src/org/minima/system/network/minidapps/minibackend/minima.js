@@ -135,14 +135,9 @@ var Minima = {
 			Minima.net.send(UID, JSON.stringify(jsonobject));
 		},
 		
-		//Resend all the connection information
-		info : function(){
-			MinimaRPC("net","info", null);
-		},
-
-		//Receive all info in the callback
-		stats : function(callback){
-			MinimaRPC("net","stats",callback);
+		//UTIL
+		info : function(callback){
+			MinimaRPC("net","info",callback);
 		},
 		
 		//GET an URL resource
@@ -157,7 +152,6 @@ var Minima = {
 	 */ 
 	file : {
 		
-		//Save & Load Text to a file 
 		save : function(text, file,  callback) {
 			MinimaRPC("file","save "+file+" "+text,callback);
 		},
@@ -166,51 +160,28 @@ var Minima = {
 			MinimaRPC("file","load "+file,callback);
 		},
 		
-		//Save & Load a JSON to a file
 		saveJSON : function(jsonobject, file,  callback) {
 			Minima.file.save(JSON.stringify(jsonobject), file, callback);
 		},
 		
 		loadJSON : function(file, callback) {
 			Minima.file.load(file, function(resp){
-				if(resp.success){
-					//Make it an actiual JSON
-					resp.data = JSON.parse(resp.data);
-					
-					//And call the original function
-					callback(resp);	
-				}else{
-					callback(resp);
-				}
+				//Make it an actiual JSON
+				resp.data = JSON.parse(resp.data);
+				
+				//And call the original function
+				callback(resp);
 			});
 		},
 		
-		//Copy file..
-		copy : function(file, newfile, callback) {
-			MinimaRPC("file","copy "+file+" "+newfile,callback);
-		},
-		
-		//Rename a file in your folder
 		move : function(file, newfile, callback) {
 			MinimaRPC("file","move "+file+" "+newfile,callback);
 		},
 		
-		//Move a file INTO the TEMP directory - all MiniDAPPs can access this
-		moveToTemp : function(file, tempfile, callback) {
-			MinimaRPC("file","movetotemp "+file+" "+tempfile,callback);
-		},
-		
-		//Move a file FROM the TEMP directory - all MiniDAPPs can access this
-		moveFromTemp : function(file, tempfile, callback) {
-			MinimaRPC("file","movefromtemp "+file+" "+tempfile,callback);
-		},
-		
-		//List the files in a directory
 		list : function(file, callback) {
 			MinimaRPC("file","list "+file,callback);
 		},
 		
-		//Delete a File
 		delete : function(file, callback) {
 			MinimaRPC("file","delete "+file,callback);
 		}

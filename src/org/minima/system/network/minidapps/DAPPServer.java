@@ -157,6 +157,9 @@ public class DAPPServer extends NanoHTTPD{
 					return getOKResponse(iconpng.returnData(), "image/png");
 					
 				}else if(fileRequested.equals("installdapp.html")) {
+					MinimaLogger.log("params "+params.toString());
+					MinimaLogger.log("files "+files.toString());
+					
 					//Get the File..
 		            String minidappfile = files.get("minidapp");
 		            
@@ -187,6 +190,9 @@ public class DAPPServer extends NanoHTTPD{
 				
 				
 				}else if(fileRequested.equals("params")) {
+					//MinimaLogger.log("ALL PARAMS : "+mParams);
+					//MinimaLogger.log("PARAM REQ : "+MiniDAPPID);
+					
 					JSONObject pp = mParams.get(MiniDAPPID);
 					if(pp == null) {
 						pp = new JSONObject();
@@ -205,7 +211,7 @@ public class DAPPServer extends NanoHTTPD{
 			//Are we uploading a file..
 			if(!files.isEmpty()) {
 				//Make the uploads folder
-				File filefolder = mBackup.getMiniDAPPFolder(MiniDAPPID);
+				File filefolder = mBackup.getMiniDAPPFilesFolder(MiniDAPPID);
 				File uploads    = new File(filefolder,"uploads"); 
 				uploads.mkdirs();
 				
