@@ -92,10 +92,6 @@ public class Message {
 		return this;
 	}
 	
-	public Message addFloat(String zName, float zValue) {
-		return addObject(zName, new Float(zValue));
-	}
-	
 	public Message addInteger(String zName, int zValue) {
 		return addObject(zName, new Integer(zValue));
 	}
@@ -144,15 +140,6 @@ public class Message {
 	 */
 	public int getInteger(String zName){
 		return ((Integer)mContents.get(zName)).intValue();
-	}
-	
-	/**
-	 * Get a Float value
-	 * @param zName
-	 * @return
-	 */
-	public float getFloat(String zName){
-		return ((Float)mContents.get(zName)).floatValue();
 	}
 	
 	/**
