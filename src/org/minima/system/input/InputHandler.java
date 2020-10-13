@@ -1,5 +1,6 @@
 package org.minima.system.input;
 
+import org.minima.objects.base.MiniData;
 import org.minima.system.Main;
 import org.minima.system.SystemHandler;
 import org.minima.system.brains.ConsensusHandler;
@@ -9,6 +10,14 @@ import org.minima.utils.json.JSONObject;
 import org.minima.utils.messages.Message;
 
 public class InputHandler extends SystemHandler{
+
+	/**
+	 * Retrieve the input handler.. used by the MiniLibs..
+	 */
+	private static InputHandler mInputHandler;
+	public static InputHandler getMainInputHandler() {
+		return mInputHandler;
+	}
 	
 	/**
 	 * Message type for input messages
@@ -26,6 +35,11 @@ public class InputHandler extends SystemHandler{
 	public static final String INPUT_RESPONSE = "_**outstream**_";
 	
 	/**
+	 * A random value used by the RPC handler to assign temp vars
+	 */
+	public static final MiniData RANDOM_VAL = MiniData.getRandomData(20);
+	
+	/**
 	 * Main Constructor
 	 * 
 	 * @param zMain
@@ -35,6 +49,9 @@ public class InputHandler extends SystemHandler{
 		
 		//And run the intro..
 		new intro().doFunction(new String[0]);
+		
+		//Store for retrieval
+		mInputHandler = this;
 	}
 	
 	@Override
