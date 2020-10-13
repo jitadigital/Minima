@@ -9,10 +9,10 @@ import org.minima.system.network.minidapps.DAPPManager;
 import org.minima.utils.MiniFile;
 import org.minima.utils.messages.Message;
 
-public class minidapp extends CommandFunction {
+public class minidapps extends CommandFunction {
 
-	public minidapp() {
-		super("minidapp");
+	public minidapps() {
+		super("minidapps");
 		
 		setHelp("(install:file|uninstall:UID|search:name|post:UID message|list)", "Install, uninstall, search, post a message directly or list the MiniDAPPs on your system.", "");
 	}
@@ -70,7 +70,7 @@ public class minidapp extends CommandFunction {
 				String message  = zInput[2];
 				
 				//Now post it..
-				Message post = getResponseMessage(DAPPManager.DAPP_DIRECTPOST);
+				Message post = getResponseMessage(DAPPManager.DAPP_POST);
 				post.addString("minidapp", minidapp);
 				post.addString("message", message);
 				getMainHandler().getNetworkHandler().getDAPPManager().PostMessage(post);
@@ -91,6 +91,6 @@ public class minidapp extends CommandFunction {
 	@Override
 	public CommandFunction getNewFunction() {
 		// TODO Auto-generated method stub
-		return new minidapp();
+		return new minidapps();
 	}
 }

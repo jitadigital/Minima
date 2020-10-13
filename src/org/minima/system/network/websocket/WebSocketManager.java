@@ -111,31 +111,14 @@ public class WebSocketManager extends SystemHandler {
 			//Message is always in JSON format
 			JSONObject msgobj = (JSONObject) new JSONParser().parse(zMessage.getString("message"));
 			
-			MinimaLogger.log("WSMESSAGE : "+msgobj);
-			
 			//What kind of message is it..
 			String msgtype = (String) msgobj.get("type");
 			if(msgtype.equals("uid")) {
-				//Get the location..
-				String loc = (String) msgobj.get("location");
-				MinimaLogger.log("WSMESSAGE UID loc:"+loc);
-				
-				//Default ID
-				String mid = "0x00";
-				
-				//Get the MiniDAPPID
-				int start = loc.indexOf("0x");
-				if(start != -1) {
-					int end = loc.indexOf("/",start);
-					if(end != -1) {
-						//Get it..!
-						mid =  loc.substring(start,end);
-					}
-				}
+				//Get the MiniDAPP UID
+				String miniuid = (String) msgobj.get("uid");
 				
 				//Set it..
-				MinimaLogger.log("WSMESSAGE ID set :"+mid);
-				mws.setMiniDAPPUID(mid);
+				mws.setMiniDAPPUID(miniuid);
 				
 			}else if(msgtype.equals("message")) {
 				Message comms = new Message(WEBSOCK_SEND_INTRAMSG);
@@ -212,8 +195,6 @@ public class WebSocketManager extends SystemHandler {
 			}
 			
 		}else if(zMessage.getMessageType().equals(WEBSOCK_SEND)) {
-			MinimaLogger.log("WS_SEND FRONTEND Send "+zMessage);
-			
 			//Who to send the message to..
 			String miniid = zMessage.getString("minidappid");
 			
@@ -236,12 +217,8 @@ public class WebSocketManager extends SystemHandler {
 					}
 				}
 			}
-			
-			MinimaLogger.log("WS_SEND FRONTEND NOT FOUND!");
-			
+		
 		}else if(zMessage.getMessageType().equals(WEBSOCK_SENDTOALL)) {
-			MinimaLogger.log("WS_SENDALL FRONTEND Send "+zMessage);
-			
 			//What to send..
 			String msg = zMessage.getString("message");
 			
