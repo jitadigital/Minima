@@ -142,13 +142,8 @@ var Minima = {
 		},
 		
 		//GET an URL resource
-		GET : function(url, callback){
+		get : function(url, callback){
 			MinimaRPC("net","get "+url,callback);
-		},
-		
-		//POST params to an URL 
-		POST : function(url, params, callback){
-			MinimaRPC("net","post "+url+" "+params,callback);
 		}
 		
 	},
