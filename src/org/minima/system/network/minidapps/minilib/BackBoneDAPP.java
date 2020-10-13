@@ -3,12 +3,14 @@ package org.minima.system.network.minidapps.minilib;
 import org.minima.utils.ProtocolException;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
+import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeJSON;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
-public class BackEndDAPP {
+public class BackBoneDAPP {
 
 	/**
 	 * JavaScript
@@ -30,7 +32,7 @@ public class BackEndDAPP {
 	 */
 	Function mMinimEventJS;
 	
-	public BackEndDAPP(String zScriptJS) throws ProtocolException {
+	public BackBoneDAPP(String zScriptJS) throws ProtocolException {
 		//The JavaScrit
 		mScript = zScriptJS;
 		
@@ -52,7 +54,7 @@ public class BackEndDAPP {
 		Object fObj = mScope.get("MinimaEvent", mScope);
 		
 		if (!(fObj instanceof Function)) {
-		    throw new ProtocolException("BackEnd JS MinimaEvent is undefined or not a function.");
+		    throw new ProtocolException("MinimaEvent is undefined or not a function.");
 		} 
 		
 		//Store for later
@@ -80,7 +82,7 @@ public class BackEndDAPP {
 	 */
 	public void MinimaEvent(String zJSONEvent) {
 		//Create a JS JSONObject
-		Object json = JSUtil.makeJSONObject(zJSONEvent, mContext, mScope);
+		Object json = makeJSONObject(zJSONEvent, mContext, mScope);
 		
 		//Make a function variable list
 		Object functionArgs[] = { json };
@@ -97,45 +99,53 @@ public class BackEndDAPP {
 	 * 
 	 * @return The JS JSONObect
 	 */
-		
+	public static Object makeJSONObject(String zJSON, Context rhino, Scriptable scope) {
+	    Object param = NativeJSON.parse(rhino, scope, zJSON, new Callable() {
+			@Override
+			public Object call(Context arg0, Scriptable arg1, Scriptable arg2, Object[] arg3) {
+				return arg3[1];
+			}
+		});
+	    return param;
+	}
+	
 	//tester
 	public static void main(String[] zArgs) {
 	
-		String js = 
+		String js = "\n" + 
+				"var tot = 0;\n" + 
+				"\n" + 
+				"/** \n" + 
+				"* Main Entry Point..\n" + 
+				"*/\n" + 
 				"function MinimaEvent(evt){\n" + 
 				"\n" + 
 				"	var jsonstr = JSON.stringify(evt,null,2);\n" + 
-				"	Minima.log(\"MinimaEvent : \"+jsonstr);\n" + 
-				"	//tot++;\n" + 
 				"	\n" + 
-				"	Minima.save(evt,\"something.txt\",function(){});\n" + 
+				"	Minima.log(\"MinimaEvent : \"+tot+\") \"+jsonstr);\n" + 
+				"	tot++;\n" + 
 				"	\n" + 
+				"	Minima.cmd( \"help;balance\", function(respjson){\n" + 
+				"		var respstr = JSON.stringify(respjson,null,2);\n" + 
+				"	\n" + 
+				"		//Convert the object to a json string..\n" + 
+				"		Minima.log(\"CMD RESPONSE : \"+respstr);\n" + 
+				"	});\n" + 
 				"}\n" + 
 				"";
 		
 		try {
-			BackEndDAPP bdapp = new BackEndDAPP(js);
+			BackBoneDAPP bdapp = new BackBoneDAPP(js);
 
-			JSONObject test = new JSONObject();
-			test.put("tster", "hello");
-			
 			//And send a JSON msg..
 			JSONObject newblock = new JSONObject();
 			newblock.put("event", "newblock");
 			newblock.put("status", "the status");
-			newblock.put("time", 1020344);
-			newblock.put("jsom", test);
-			newblock.put("bool", true);
-			newblock.put("dounble", 23.345);
 			
-			JSONArray arr = new JSONArray();
-			arr.add("help");
-			arr.add(new Integer(45));
-			arr.add(new Long(45));
+			JSONArray testarray = new JSONArray();
+			testarray.add(newblock);
 			
-			newblock.put("array", arr);
-			
-			bdapp.MinimaEvent(newblock.toString());
+			bdapp.MinimaEvent(testarray.toString());
 		
 			bdapp.shutdown();
 		

@@ -1,17 +1,15 @@
 package org.minima.system.network.minidapps.minilib;
 
 import org.minima.utils.MinimaLogger;
-import org.minima.utils.json.JSONObject;
 import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeObject;
 
 public class MinimaJS {
 	
-	BackEndDAPP mBackBone;
+	BackBoneDAPP mBackBone;
 	
 	String mMiniDAPPID = "0x00";
 	
-	public MinimaJS(String zMiniDAPPID, BackEndDAPP zBackBone) {
+	public MinimaJS(String zMiniDAPPID, BackBoneDAPP zBackBone) {
 		mMiniDAPPID  = zMiniDAPPID;
 		mBackBone    = zBackBone;
 	}
@@ -42,24 +40,6 @@ public class MinimaJS {
 		//Run it..
 		Thread cmdthread = new Thread(cmd);
 		cmdthread.start();
-	}
-	
-	/**
-	 * File Access Functions..Obj
-	 */
-	public void save(Object zObject, String zFilename, Function zCallback) {
-		MinimaLogger.log("save : "+zObject+" "+zFilename);
-	
-		NativeObject nativeObject = (NativeObject)zObject;
-		
-		JSONObject json = JSUtil.toJsonObject(nativeObject);
-		
-		MinimaLogger.log("json : "+json.toString());
-		
-	}
-	
-	public void load(String zFilename, Function zCallback) {
-		
 	}
 	
 	/**
