@@ -384,8 +384,6 @@ public class ConsensusNet extends ConsensusProcessor {
 			
 			//Do we have it..
 			if(getMainDB().getTxPOW(txpowid) == null) {
-				MinimaLogger.log("NEW TXPOWID "+txpowid.to0xString()+" from "+zMessage.getObject("netclient"));
-				
 				//We don't have it, get it..
 				sendTxPowRequest(zMessage, txpowid);
 			}
@@ -633,8 +631,6 @@ public class ConsensusNet extends ConsensusProcessor {
 			//Post it for later..
 			getConsensusHandler().PostTimerMessage(newtxpowid);
 			return;
-		}else {
-			MinimaLogger.log("SendTxPOWRequest as not been asked for yet.."+data+" from "+client);
 		}
 		
 		//Give it to the client to send on..	
