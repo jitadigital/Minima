@@ -432,7 +432,7 @@ public class NetworkHandler extends SystemHandler{
 	
 	/**
 	 * Get all the current net clients..
-	 * @return the list
+	 * @return
 	 */
 	public ArrayList<MinimaClient> getNetClients() {
 		return mClients;
