@@ -20,8 +20,6 @@ public class CommsManager extends SystemHandler {
 	
 	public static final String COMMS_BROADCAST    = "COMMS_BROADCAST";
 	
-	public static final String COMMS_RESET_INFO         = "COMMS_INFO";
-	
 	public static final String COMMS_CONNECT      = "COMMS_CONNECT";
 	public static final String COMMS_DISCONNECT   = "COMMS_DISCONNECT";
 	public static final String COMMS_SEND         = "COMMS_SEND";
@@ -84,7 +82,7 @@ public class CommsManager extends SystemHandler {
 	@Override
 	protected void processMessage(Message zMessage) throws Exception {
 		
-		MinimaLogger.log("CommsManager : "+zMessage);
+//		MinimaLogger.log("CommsManager : "+zMessage);
 		
 		if(zMessage.getMessageType().equals(COMMS_START)) {
 			//the details
@@ -101,7 +99,7 @@ public class CommsManager extends SystemHandler {
 			//Add to our List
 			mServers.add(server);
 			
-			//Let the MiniDAPP know..
+			//Broadcast..
 			JSONObject netaction = new JSONObject();
 			netaction.put("action", "server_start");
 			netaction.put("port", server.getPort());
@@ -219,28 +217,6 @@ public class CommsManager extends SystemHandler {
 			if(client!= null) {
 				client.postSend(message);	
 			}
-		
-		}else if(zMessage.getMessageType().equals(COMMS_RESET_INFO)) {
-			//WHich MiniDAPP..
-			String minidappid =zMessage.getString("minidappid");
-			
-			//Now send that MiniDAPP all the info pertaining to it..
-			for(CommsServer server : mServers) {
-				if(server.getMiniDAPPID().equals(minidappid)) {
-					//Let the MiniDAPP know..
-					JSONObject netaction = new JSONObject();
-					netaction.put("action", "server_start");
-					netaction.put("port", server.getPort());
-					postCommsMssage(netaction,minidappid);	
-				}
-			}
-			
-			//And all the clients..
-			for(CommsClient client : mClients) {
-				if(client.getMiniDAPPID().equals(minidappid)) {
-					postClientMessage("client_new",client);
-				}
-			}
 			
 		}else if(zMessage.getMessageType().equals(COMMS_BROADCAST)) {
 			String message = zMessage.getString("message");
@@ -265,7 +241,6 @@ public class CommsManager extends SystemHandler {
 		
 		netaction.put("host", zClient.getHost());
 		netaction.put("port", zClient.getPort());
-		netaction.put("hostport", zClient.getHost()+":"+zClient.getPort());
 		netaction.put("uid", zClient.getUID());
 		netaction.put("minidappid", zClient.getMiniDAPPID());
 		netaction.put("outbound", zClient.isOutBound());
@@ -285,8 +260,6 @@ public class CommsManager extends SystemHandler {
 		Message msg = new Message(DAPPManager.DAPP_MINIDAPP_POST);
 		msg.addObject("minidapp", zMiniDAPPID);
 		msg.addObject("message", websocketmsg);
-		
-		MinimaLogger.log("POST MESSAGE : "+msg);
 		
 		//Post to the Network..
 		getMainHandler().getNetworkHandler().getDAPPManager().PostMessage(msg);
