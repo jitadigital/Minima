@@ -78,6 +78,9 @@ public class FILE implements Runnable {
 		//get the file
 		File thefile = new File(minidappfolder,file);
 		
+		//Make sure the parent folder exists..
+		thefile.getParentFile().mkdirs();
+		
 		//The response
 		JSONObject response = new JSONObject();
 		response.put("function", filefunc);
@@ -85,9 +88,6 @@ public class FILE implements Runnable {
 		
 		//Which command is it..
 		if(filefunc.equals("save")) {
-			//Make sure the parent folder exists..
-			thefile.getParentFile().mkdirs();
-			
 			//Get the file index
 			int index    = mCommand.indexOf(file);
 			String json  = mCommand.substring(index + file.length()).trim();
@@ -129,9 +129,6 @@ public class FILE implements Runnable {
 			
 		}else if(filefunc.equals("list")) {
 			response.put("exists", thefile.exists());
-			//Create an Array of file objects
-			JSONArray farr = new JSONArray();
-			
 			if(thefile.exists()) {
 				if(thefile.isFile()) {
 					response.put("size", thefile.length());
@@ -139,21 +136,23 @@ public class FILE implements Runnable {
 				}else if(thefile.isDirectory()) {
 					response.put("directory", true);
 				}	
+			}
 			
-				//Now add the zFolder..
-				File[] files = thefile.listFiles();
-				
-				for(File ff : files) {
-					JSONObject filedesc = new JSONObject();
-					filedesc.put("name", ff.getName());
-					filedesc.put("dir", ff.isDirectory());
-					if(!ff.isDirectory()) {
-						filedesc.put("size", ff.length());	
-					}else {
-						filedesc.put("size", 0);
-					}
-					farr.add(filedesc);
+			//Now add the zFolder..
+			File[] files = thefile.listFiles();
+			
+			//Create an Array of file objects
+			JSONArray farr = new JSONArray();
+			for(File ff : files) {
+				JSONObject filedesc = new JSONObject();
+				filedesc.put("name", ff.getName());
+				filedesc.put("dir", ff.isDirectory());
+				if(!ff.isDirectory()) {
+					filedesc.put("size", ff.length());	
+				}else {
+					filedesc.put("size", 0);
 				}
+				farr.add(filedesc);
 			}
 			
 			//Create the Response JSON
@@ -165,10 +164,8 @@ public class FILE implements Runnable {
 		}else if(filefunc.equals("delete")) {
 			response.put("existed", thefile.exists());
 			
-			if(thefile.exists()) {
-				//Delete
-				BackupManager.safeDelete(thefile);
-			}
+			//Delete
+			BackupManager.safeDelete(thefile);
 			
 			//Convert to Text
 			mFinalResult = response.toString();
