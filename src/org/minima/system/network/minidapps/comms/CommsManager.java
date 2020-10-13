@@ -244,12 +244,20 @@ public class CommsManager extends SystemHandler {
 	
 	public void postCommsMssage(JSONObject zMessage, String zMiniDAPPID) {
 		//someone has connected to a port you opened..
-		JSONObject websocketmsg = new JSONObject();
-		websocketmsg.put("event","network");
-		websocketmsg.put("details",zMessage);
+		JSONObject newclient = new JSONObject();
+		newclient.put("event","network");
+		newclient.put("details",zMessage);
 		
-		Message msg = new Message(NetworkHandler.NETWORK_WS_NOTIFY);
-		msg.addObject("message", websocketmsg);
+		Message msg = null;
+
+//		if(zMiniDAPPID.equals("")) {
+			msg = new Message(NetworkHandler.NETWORK_WS_NOTIFYALL);
+			msg.addString("message", newclient.toString());
+//		}else {
+//			msg = new Message(NetworkHandler.NETWORK_WS_NOTIFY_MINIDAPP);
+//			msg.addString("minidappid", newclient.toString());
+//			msg.addString("message", newclient.toString());
+//		}
 		
 		//Post to the Network..
 		getMainHandler().getNetworkHandler().PostMessage(msg);
