@@ -207,10 +207,6 @@ public class Start {
 			rcmainserver.setAutoMine();
 		}
 		
-		if(!connect) {
-			rcmainserver.setRequireNoInitialSync();
-		}
-		
 		//Start the system
 		rcmainserver.PostMessage(Main.SYSTEM_STARTUP);
 		
