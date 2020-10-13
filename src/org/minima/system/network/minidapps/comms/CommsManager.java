@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.minima.system.Main;
 import org.minima.system.SystemHandler;
-import org.minima.system.input.InputHandler;
 import org.minima.system.network.NetworkHandler;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONObject;
@@ -99,9 +98,6 @@ public class CommsManager extends SystemHandler {
 			//Now create one..
 			CommsServer server = new CommsServer(port, this);
 			
-			//JSONObject resp = InputHandler.getResponseJSON(zMessage);
-			InputHandler.endResponse(zMessage, true, "Server Started");
-			
 		}else if(zMessage.getMessageType().equals(COMMS_NEWSERVER)) {
 			//Get the Server
 			CommsServer server = (CommsServer) zMessage.getObject("server");
@@ -111,7 +107,7 @@ public class CommsManager extends SystemHandler {
 			
 			//Broadcast..
 			JSONObject netaction = new JSONObject();
-			netaction.put("action", "server_start");
+			netaction.put("action", "newserver");
 			netaction.put("port", server.getPort());
 			postCommsMssage(netaction);
 			
@@ -143,35 +139,13 @@ public class CommsManager extends SystemHandler {
 				//Broadcast..
 				JSONObject netaction = new JSONObject();
 				netaction.put("action", "server_stop");
-				netaction.put("port", port);
-				postCommsMssage(netaction);
-				
-				//And stop the clients..
-				for(CommsClient client : mClients) {
-					if(client.getPort() == port && client.isInBound()) {
-						client.PostMessage(CommsClient.COMMSCLIENT_SHUTDOWN);
-					}
-				}
-			}else {
-				//Broadcast..
-				JSONObject netaction = new JSONObject();
-				netaction.put("action", "server_notfound");
-				netaction.put("port", port);
+				netaction.put("port", server.getPort());
 				postCommsMssage(netaction);
 			}
 			
 		}else if(zMessage.getMessageType().equals(COMMS_CONNECT)) {
 			String hostport = zMessage.getString("hostport");
 			int index = hostport.indexOf(":");
-			if(index == -1) {
-				//Broadcast..
-				JSONObject netaction = new JSONObject();
-				netaction.put("action", "error");
-				netaction.put("message", "inavlid host:port to connect to "+hostport);
-				postCommsMssage(netaction);
-				return;
-			}
-			
 			String host = hostport.substring(0, index);
 			int port = Integer.parseInt(hostport.substring(index+1).trim());
 			
