@@ -61,16 +61,16 @@ public class RPCHandler implements Runnable {
 			String fileRequested = parse.nextToken();
 			
 			//Get the Headers..
-			String MiniDAPPID = "0x00";
+			String MiniDAPPID = "";
 			int contentlength = 0;
 			while(input != null && !input.trim().equals("")) {
 				int ref = input.indexOf("Referer:"); 
 				if(ref != -1) {
 					//Get the referer..
-					int start  = input.indexOf("/minidapps/0x");
+					int start  = input.indexOf("/minidapps/0x")+11;
 	        		int end    = -1;
 	        		if(start!=-1) {
-	        			end    = input.indexOf("/", start+11);
+	        			end    = input.indexOf("/", start);
 	        		}
 	        		if(end!=-1) {
 	        			MiniDAPPID = input.substring(start, end);
