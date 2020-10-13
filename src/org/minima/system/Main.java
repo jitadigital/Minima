@@ -171,11 +171,6 @@ public class Main extends MessageProcessor {
 		mConsensus.setHardResetAllowed(false);
 	}
 	
-	public void noChainReset() {
-		//No Hard Reset..
-		mConsensus.setHardResetAllowed(false);
-	}
-		
 	@Override
 	protected void processMessage(Message zMessage) throws Exception {
 		
