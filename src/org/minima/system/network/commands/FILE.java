@@ -8,7 +8,6 @@ import java.util.StringTokenizer;
 import org.minima.system.Main;
 import org.minima.system.brains.BackupManager;
 import org.minima.utils.MiniFile;
-import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
 
@@ -39,8 +38,7 @@ public class FILE implements Runnable {
 		
 		//Where is the database..
 		BackupManager backup = Main.getMainHandler().getBackupManager();
-		File minidappfolder  = backup.getMiniDAPPFolder(mMiniDAPPID);
-		File tempfolder      = backup.getTempFolder();
+		File minidappfolder  = backup.getMiniDAPPFilesFolder(mMiniDAPPID);
 		
 		//get the file
 		File thefile = new File(minidappfolder,file);
@@ -73,38 +71,6 @@ public class FILE implements Runnable {
 				e.printStackTrace();
 			}
 			
-		}else if(filefunc.equals("load")) {
-			if(thefile.exists()) {
-				try {
-					byte[] data = MiniFile.readCompleteFile(thefile);
-					response.put("data", new String(data,Charset.forName("UTF-8")));
-					response.put("success", true);
-					
-				} catch (IOException e) {
-					response.put("success", false);
-					response.put("exception", e.toString());
-					e.printStackTrace();
-				}
-			}else {
-				response.put("success", false);
-				response.put("exception", "..does not exist!");
-			}
-			
-		}else if(filefunc.equals("copy")) {
-			String newfile = strtok.nextToken().trim();
-			File copyto = new File(minidappfolder, newfile);
-			
-			//Do the move..
-			try {
-				MiniFile.copyFile(thefile, copyto);
-				response.put("success", true);
-				response.put("copy", newfile);
-				
-			} catch (IOException e) {
-				response.put("success", false);
-				response.put("exception", e.toString());
-			}
-			
 		}else if(filefunc.equals("move")) {
 			String newfile = strtok.nextToken().trim();
 			File moveto = new File(minidappfolder, newfile);
@@ -118,41 +84,19 @@ public class FILE implements Runnable {
 			
 			response.put("renamed", newfile);
 			response.put("move", success);
-		
-		}else if(filefunc.equals("movetotemp")) {
-			String tempfile = strtok.nextToken().trim();
-			File moveto = new File(tempfolder, tempfile);
 			
-			//Check parents exis
-			File parent = moveto.getParentFile();
-			parent.mkdirs();
+		}else if(filefunc.equals("load")) {
+			if(thefile.exists()) {
+				try {
+					byte[] data = MiniFile.readCompleteFile(thefile);
+					response.put("data", new String(data,Charset.forName("UTF-8")));
 					
-			//Do the move..
-			boolean success = thefile.renameTo(moveto);
-			
-			String tempbasepath  = tempfolder.getAbsolutePath();
-			String tempfinalpath = tempfile.substring(tempbasepath.length());
-			
-			response.put("renamed", tempbasepath);
-			response.put("move", success);
-		
-		}else if(filefunc.equals("movefromtemp")) {
-			String tempfile = strtok.nextToken().trim();
-			File movefrom = new File(tempfolder, tempfile);
-			
-			//Check parents exist
-			File parent = thefile.getParentFile();
-			parent.mkdirs();
-			
-			if(!movefrom.exists()) {
-				response.put("move", false);
-				response.put("exception", "file does not exist");
+				} catch (IOException e) {
+					response.put("exception", e.toString());
+					e.printStackTrace();
+				}
 			}else {
-				//Do the move..
-				boolean success = movefrom.renameTo(thefile);
-				
-				response.put("renamed", finalpath);
-				response.put("move", success);
+				response.put("exception", "..does not exist!");
 			}
 			
 		}else if(filefunc.equals("list")) {

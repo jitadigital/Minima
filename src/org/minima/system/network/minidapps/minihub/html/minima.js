@@ -42,9 +42,6 @@ var Minima = {
 	//TxPoWID of the current top block
 	txpowid : "0x00",
 	
-	//The HOST 
-	host : "",
-	
 	//RPC Host for Minima
 	rpchost : "http://127.0.0.1:9002",
 	
@@ -69,20 +66,10 @@ var Minima = {
 	 */
 	init : function(callback){
 		//Log a little..
-		Minima.log("Initialisation..");
+		Minima.log("Initialisation.. v2");
 		
 		//Store the callback
 		MINIMA_MAIN_CALLBACK = callback;
-		
-		//Calculate the HOST
-		Minima.host = window.location.hostname;
-		
-		//The Port determives the WebSocket and RPC port..
-		Minima.rpchost = "http://"+Minima.host+":"+(window.location.port-2);
-		Minima.wshost = "ws://"+Minima.host+":"+(window.location.port-1);
-		
-		Minima.log("RPCHOST : "+Minima.rpchost);
-		Minima.log("WCHOST  : "+Minima.wshost);
 		
 		//Any Parameters..
 		var paramstring = window.location.protocol+"//"+window.location.hostname+":"+window.location.port+"/params";
@@ -189,16 +176,11 @@ var Minima = {
 			Minima.net.send(UID, JSON.stringify(jsonobject));
 		},
 		
-		//Resend all the connection information
-		info : function(){
-			MinimaRPC("net","info", null);
+		//UTIL
+		info : function(callback){
+			MinimaRPC("net","info",callback);
 		},
-
-		//Receive all info in the callback
-		stats : function(callback){
-			MinimaRPC("net","stats",callback);
-		},
-				
+		
 		//GET an URL resource
 		get : function(url, callback){
 			MinimaRPC("net","get "+url,callback);
@@ -212,7 +194,6 @@ var Minima = {
 	 */ 
 	file : {
 		
-		//Save & Load Text to a file 
 		save : function(text, file,  callback) {
 			MinimaRPC("file","save "+file+" "+text,callback);
 		},
@@ -221,51 +202,28 @@ var Minima = {
 			MinimaRPC("file","load "+file,callback);
 		},
 		
-		//Save & Load a JSON to a file
 		saveJSON : function(jsonobject, file,  callback) {
 			Minima.file.save(JSON.stringify(jsonobject), file, callback);
 		},
 		
 		loadJSON : function(file, callback) {
 			Minima.file.load(file, function(resp){
-				if(resp.success){
-					//Make it an actiual JSON
-					resp.data = JSON.parse(resp.data);
-					
-					//And call the original function
-					callback(resp);	
-				}else{
-					callback(resp);
-				}
+				//Make it an actiual JSON
+				resp.data = JSON.parse(resp.data);
+				
+				//And call the original function
+				callback(resp);
 			});
 		},
 		
-		//Copy file..
-		copy : function(file, newfile, callback) {
-			MinimaRPC("file","copy "+file+" "+newfile,callback);
-		},
-		
-		//Rename a file in your folder
 		move : function(file, newfile, callback) {
 			MinimaRPC("file","move "+file+" "+newfile,callback);
 		},
 		
-		//Move a file INTO the TEMP directory - all MiniDAPPs can access this
-		moveToTemp : function(file, tempfile, callback) {
-			MinimaRPC("file","movetotemp "+file+" "+tempfile,callback);
-		},
-		
-		//Move a file FROM the TEMP directory - all MiniDAPPs can access this
-		moveFromTemp : function(file, tempfile, callback) {
-			MinimaRPC("file","movefromtemp "+file+" "+tempfile,callback);
-		},
-		
-		//List the files in a directory
 		list : function(file, callback) {
 			MinimaRPC("file","list "+file,callback);
 		},
 		
-		//Delete a File
 		delete : function(file, callback) {
 			MinimaRPC("file","delete "+file,callback);
 		}
@@ -301,9 +259,10 @@ var Minima = {
 	 * Intra MiniDAPP communication
 	 */
 	minidapps : {
+		
 		//List the currently installed minidapps
 		list : function(callback){
-			Minima.cmd("minidapps list",callback);
+			Minima.cmd("minidapp list",callback);
 		},
 		
 		//Function to call when an Intra-MiniDAPP message is received
@@ -324,6 +283,7 @@ var Minima = {
 		}
 
 	},
+	
 	
 	/**
 	 * UTILITY FUNCTIONS
@@ -398,6 +358,7 @@ function MinimaPostMessage(event, info){
 
    //And dispatch
    MINIMA_MAIN_CALLBACK(data);   
+   //window.dispatchEvent(new CustomEvent("MinimaEvent", {detail:data} ));
 }
 
 /**
