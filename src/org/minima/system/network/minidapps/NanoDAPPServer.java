@@ -26,7 +26,7 @@ import org.minima.utils.nanohttpd.protocols.http.request.Method;
 import org.minima.utils.nanohttpd.protocols.http.response.Response;
 import org.minima.utils.nanohttpd.protocols.http.response.Status;
 
-public class DAPPServer extends NanoHTTPD{
+public class NanoDAPPServer extends NanoHTTPD{
 
 	DAPPManager mDAPPManager;
 
@@ -37,7 +37,7 @@ public class DAPPServer extends NanoHTTPD{
 	String mCurrentIndex     = "**";
 	String mCurrentMiniDAPPS = "**";
 	
-	public DAPPServer(int zPort, DAPPManager zDAPPManager) {
+	public NanoDAPPServer(int zPort, DAPPManager zDAPPManager) {
 		super(zPort);
 		
 		mDAPPManager = zDAPPManager;
