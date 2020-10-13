@@ -84,11 +84,9 @@ public class MMRData implements Streamable{
 		mCoin 		 = zCoin;
 		mBlockNumber = zInBlock;
 		
-		//Copy the state - only keep the keepers..
+		//Copy the state
 		for(StateVariable sv : zState) {
-			if(sv.isKeepMMR()) {
-				mPrevState.add(sv);
-			}
+			mPrevState.add(sv);
 		}
 		
 		//Full  Data
