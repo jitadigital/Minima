@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -34,10 +32,8 @@ import org.minima.system.input.InputHandler;
 import org.minima.system.network.NetworkHandler;
 import org.minima.system.network.minidapps.comms.CommsManager;
 import org.minima.system.network.minidapps.minihub.hexdata.minimajs;
-import org.minima.system.network.minidapps.minilib.BackEndDAPP;
 import org.minima.system.network.websocket.WebSocketManager;
 import org.minima.utils.Crypto;
-import org.minima.utils.MiniFile;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
@@ -48,11 +44,11 @@ import org.minima.utils.nanohttpd.protocols.http.NanoHTTPD;
 
 public class DAPPManager extends SystemHandler {
 
-	public static String DAPP_INIT           = "DAPP_INIT";
-	public static String DAPP_INSTALL        = "DAPP_INSTALL";
-	public static String DAPP_UNINSTALL      = "DAPP_UNINSTALL";
-	public static String DAPP_POST           = "DAPP_POST";
-	public static String DAPP_MINIDAPP_POST  = "DAPP_MINIDAPP_POST";
+	public static String DAPP_INSTALL   = "DAPP_INSTALL";
+	public static String DAPP_UNINSTALL = "DAPP_UNINSTALL";
+	public static String DAPP_POST      = "DAPP_POST";
+	
+	public static String DAPP_MINIDAPP_POST      = "DAPP_MINIDAPP_POST";
 	
 	JSONArray CURRENT_MINIDAPPS = new JSONArray();
 	String MINIDAPPS_FOLDER     = "";
@@ -72,26 +68,33 @@ public class DAPPManager extends SystemHandler {
 	
 	NetworkHandler mNetwork;
 	
-	/**
-	 * BackEnd JS DAPP
-	 */
-	Hashtable<String, BackEndDAPP> mBackends;
-	
 	public DAPPManager(Main zMain) {
 		super(zMain, "DAPPMAnager");
 		
 		//Need access to this
 		mNetwork = getMainHandler().getNetworkHandler();
 		
-		//All the backends are stored here..
-		mBackends = new Hashtable<>();
-		
 		//What is the current Host
 		mOldHost  = mNetwork.getBaseHost();
 		mBasePort = mNetwork.getBasePort();
+				
+		mCommsManager = new CommsManager(zMain);
 		
-		//Init the System
-		PostMessage(DAPP_INIT);
+		//Now create the Minima JS file..
+	    recalculateMinimaJS();
+	    
+		//Calculate the current MiniDAPPS
+		recalculateMiniDAPPS();
+		
+		mDAPPServer = new DAPPServer(mNetwork.getMiniDAPPServerPort(), this);
+		try {
+			mDAPPServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+			MinimaLogger.log("MiniDAPP server started on por "+mNetwork.getMiniDAPPServerPort());
+		} catch (IOException e) {
+			MinimaLogger.log(e.toString());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public CommsManager getCommsManager() {
@@ -158,7 +161,7 @@ public class DAPPManager extends SystemHandler {
 		return MINIDAPPS_FOLDER;
 	}
 	
-	private JSONObject loadConfFile(File zConf) {
+	public JSONObject loadConfFile(File zConf) {
 		JSONObject ret = new JSONObject();
 		
 		try {
@@ -204,17 +207,9 @@ public class DAPPManager extends SystemHandler {
 		return ret;
 	}
 	
-	private JSONArray recalculateMiniDAPPS() {
+	public JSONArray recalculateMiniDAPPS() {
 		//Clear the OLD
 		CURRENT_MINIDAPPS.clear();
-		
-		//And the backends..
-		Enumeration<BackEndDAPP> bends = mBackends.elements();
-		while(bends.hasMoreElements()) {
-			BackEndDAPP bend = bends.nextElement();
-			bend.shutdown();
-		}
-		mBackends.clear();
 		
 		//This is the folder..
 		File alldapps = getMainHandler().getBackupManager().getMiniDAPPFolder();
@@ -224,6 +219,9 @@ public class DAPPManager extends SystemHandler {
 		
 		//List it..
 		File[] apps = alldapps.listFiles();
+		
+		//Each MiniDAPP gets it's OWN port..
+		int miniport = 1;
 		
 		//Cycle through them..
 		if(apps != null) {
@@ -243,12 +241,8 @@ public class DAPPManager extends SystemHandler {
 					}
 				}
 				
-				//What MiniDAPP is this..
-				String minidappid = app.getName();
-				
 				//Open it up..
-				File conf    = new File(app,"minidapp.conf");
-				File backend = new File(app,"backend.js");
+				File conf = new File(app,"minidapp.conf");
 				
 				//Does it exist..
 				if(!conf.exists()) {
@@ -260,9 +254,7 @@ public class DAPPManager extends SystemHandler {
 						for(File subapp : subapps) {
 							//Ignore the SQL folder that we generate..
 							if(subapp.isDirectory()) {
-								conf    = new File(subapp,"minidapp.conf");
-								backend = new File(subapp,"backend.js");
-								
+								conf = new File(subapp,"minidapp.conf");
 								if(conf.exists()) {
 									break;	
 								}
@@ -270,8 +262,6 @@ public class DAPPManager extends SystemHandler {
 						}
 					}
 				}
-				
-				//minidapps install:/home/spartacusrex/git/MiFi/www/minidapps/experimental/chatter.minidapp
 				
 				//Check it exists..
 				if(conf.exists()) {
@@ -281,25 +271,8 @@ public class DAPPManager extends SystemHandler {
 					//Add the timestamp..
 					confjson.put("installed", timestamp);
 					
-					//Is there a Back end
-					if(backend.exists()) {
-						//Load it..
-						try {
-							//Load the JS file..
-							String backjs = new String(MiniFile.readCompleteFile(backend),"UTF-8");
-						
-							//Create a BackEnd APP..
-							BackEndDAPP bedapp = new BackEndDAPP(backjs, minidappid);
-							
-							//Add to the List..
-							mBackends.put(minidappid, bedapp);
-						
-							MinimaLogger.log("BackEND create for "+minidappid);
-							
-						} catch (Exception e) {
-							MinimaLogger.log("Error loading backend.js for "+backend.getAbsolutePath());
-						} 
-					}
+					///Give it a unique Port..
+					//confjson.put("port", miniport++);
 					
 					//Add it..
 					CURRENT_MINIDAPPS.add(confjson);
@@ -329,28 +302,7 @@ public class DAPPManager extends SystemHandler {
 	
 	@Override
 	protected void processMessage(Message zMessage) throws Exception {
-		
-		if(zMessage.getMessageType().equals(DAPP_INIT)) {
-			//Create the Comms Manager
-			mCommsManager = new CommsManager(getMainHandler());
-			
-			//Now create the Minima JS file..
-		    recalculateMinimaJS();
-		    
-			//Calculate the current MiniDAPPS
-			recalculateMiniDAPPS();
-			
-			//Create the MiniDAPP server
-			mDAPPServer = new DAPPServer(mNetwork.getMiniDAPPServerPort(), this);
-			try {
-				mDAPPServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-				MinimaLogger.log("MiniDAPP server started on por "+mNetwork.getMiniDAPPServerPort());
-				
-			} catch (IOException e) {
-				MinimaLogger.log("MiniDAPP server error "+ e.toString());
-			}
-			
-		}else if(zMessage.getMessageType().equals(DAPP_INSTALL)) {
+		if(zMessage.getMessageType().equals(DAPP_INSTALL)) {
 			//Get the Data
 			MiniData data = (MiniData) zMessage.getObject("minidapp");
 			
@@ -361,9 +313,8 @@ public class DAPPManager extends SystemHandler {
 			}
 
 			//Hash it..
-			MiniData hash     = Crypto.getInstance().hashObject(data, 160);
-			String minidappid = hash.to0xString();
-			InputHandler.getResponseJSON(zMessage).put("uid", minidappid);
+			MiniData hash = Crypto.getInstance().hashObject(data, 160);
+			InputHandler.getResponseJSON(zMessage).put("UID", hash.to0xString());
 			
 			//This is the folder..
 			File alldapps = getMainHandler().getBackupManager().getMiniDAPPFolder();
@@ -433,9 +384,6 @@ public class DAPPManager extends SystemHandler {
 	        
 	        //It's done!
 			recalculateMiniDAPPS();
-			
-			//Now get the CONF file..
-			
 		
 			InputHandler.endResponse(zMessage, true, "MiniDAPP installed..");
 			
@@ -491,10 +439,6 @@ public class DAPPManager extends SystemHandler {
 				minidappid = zMessage.getString("minidappid");
 			}
 			
-			//First the Back End..
-			sendToBackEND(minidappid,json);
-			
-			//Now the Front End..
 			if(minidappid.equals("")) {
 				Message msg = new Message(WebSocketManager.WEBSOCK_SENDTOALL);
 				msg.addString("message", json.toString());
@@ -505,54 +449,9 @@ public class DAPPManager extends SystemHandler {
 				msg.addString("minidappid", minidappid);
 				mNetwork.getWebSocketManager().PostMessage(msg);
 			}
-		}
-	}
-	
-	private void sendToBackEND(String zMiniDAPPID, JSONObject zJSON) {
-		//Create the same EVent as on the Web
-	    JSONObject jobj  = CreatePostEvent(zJSON);
-	    String JSONEvent = jobj.toString();
-	    
-		if(zMiniDAPPID.equals("")){
-			Enumeration<BackEndDAPP> bends = mBackends.elements();
-			while(bends.hasMoreElements()) {
-				BackEndDAPP bend = bends.nextElement();
-				bend.MinimaEvent(JSONEvent);
-			}
-		}else {
-			BackEndDAPP bend = mBackends.get(zMiniDAPPID);
-			if(bend != null) {
-				bend.MinimaEvent(JSONEvent);
-			}
-		}	
-	}
-	
-	/**
-	 * Make the event the same as when on the web page..
-	 * 
-	 * @param zEventType
-	 * @param zJSON
-	 */
-	private JSONObject CreatePostEvent(JSONObject zJSON) {
-		String event = (String) zJSON.get("event");
 		
-		JSONObject data = new JSONObject();
-		data.put("event", event);
-		
-		if(event.equals("newblock")) {
-			data.put("info", zJSON.get("txpow"));	
-		
-		}else if(event.equals("newtransaction")) {
-			data.put("info", zJSON.get("txpow"));	
-			
-		}else if(event.equals("newbalance")) {
-			data.put("info", zJSON.get("balance"));	
-			
 		}
 		
-		JSONObject evt = new JSONObject();
-		evt.put("detail", data);
-		
-		return evt;
 	}
+	
 }
