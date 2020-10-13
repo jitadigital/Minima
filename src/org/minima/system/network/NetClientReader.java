@@ -16,6 +16,7 @@ import org.minima.objects.greet.TxPoWList;
 import org.minima.system.backup.SyncPackage;
 import org.minima.system.brains.ConsensusHandler;
 import org.minima.system.brains.ConsensusNet;
+import org.minima.system.brains.ConsensusPrint;
 import org.minima.utils.Crypto;
 import org.minima.utils.MiniFormat;
 import org.minima.utils.MinimaLogger;

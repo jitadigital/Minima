@@ -2,6 +2,7 @@ package org.minima.system.brains;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -25,6 +26,7 @@ import org.minima.system.network.NetClient;
 import org.minima.system.network.NetClientReader;
 import org.minima.system.txpow.TxPoWChecker;
 import org.minima.utils.Crypto;
+import org.minima.utils.MiniFile;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.messages.Message;
 import org.minima.utils.messages.TimerMessage;

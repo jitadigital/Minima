@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import org.minima.system.input.InputHandler;
 import org.minima.utils.MinimaLogger;
 
 public class RPCServer implements Runnable{
