@@ -1,7 +1,5 @@
 package org.minima.system.network.commands;
 
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -11,8 +9,6 @@ import org.minima.system.network.minidapps.comms.CommsClient;
 import org.minima.system.network.minidapps.comms.CommsManager;
 import org.minima.system.network.minidapps.comms.CommsServer;
 import org.minima.system.network.minidapps.minilib.JSMiniLibUtil;
-import org.minima.system.network.rpc.RPCClient;
-import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
 import org.minima.utils.json.parser.JSONParser;
@@ -155,26 +151,6 @@ public class NET implements Runnable {
 				carr.add(client.toJSON());
 			}
 			resp.put("clients", carr);	
-		
-		}else if(mCommand.startsWith("get ")) {
-			String url = strtok.nextToken();
-			
-			try {
-				String result = RPCClient.sendGET(url);
-				
-				MinimaLogger.log(URLEncoder.encode(result,"UTF-8"));
-				
-				resp.put("result", result);
-				
-			} catch (IOException e) {
-				resp.put("error", e.toString());
-				
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
-		}else {
-			resp.put("error", "UNKNOWN COMMAND");
 		}
 		
 		//Stroe for pickup
