@@ -8,8 +8,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import org.minima.utils.MinimaLogger;
-
 public class RPCClient {
 
 	public static String USER_AGENT = "Minima/1.0";
@@ -41,7 +39,7 @@ public class RPCClient {
 			is.close();
 			
 		} else {
-			MinimaLogger.log("GET request FAIL "+zHost);
+//			System.out.println("GET request not worked");
 		}
 			
 		return response.toString(); 
