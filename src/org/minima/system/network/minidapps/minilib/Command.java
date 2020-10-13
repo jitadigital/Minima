@@ -18,10 +18,11 @@ public class Command implements Runnable {
 	
 	//Call back with the response when finished
 	Function mCallback;
+	
 	Context    mContext;
 	Scriptable mScope;
 	
-	//The Final Result..
+	//The Finla Result..
 	String mFinalResult = "";
 	
 	public Command(String zCommand) {
@@ -112,6 +113,14 @@ public class Command implements Runnable {
 			//And now get all the answers in one go..
 			mFinalResult = responses.toString();
 		}
+		
+//		//Run the function..
+//		MinimaLogger.log("RUN CMD "+mCommand);
+//		//And send a JSON msg..
+//		JSONObject newblock = new JSONObject();
+//		newblock.put("event", "newblock");
+//		newblock.put("status", "the status");
+//		mFinalResult = newblock.toString();
 		
 		//Now send the result back vis the callback..
 		if(mCallback != null) {
