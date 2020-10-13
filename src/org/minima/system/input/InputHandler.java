@@ -8,9 +8,8 @@ import org.minima.utils.MinimaLogger;
 import org.minima.utils.ResponseStream;
 import org.minima.utils.json.JSONObject;
 import org.minima.utils.messages.Message;
-import org.minima.utils.messages.MessageProcessor;
 
-public class InputHandler extends MessageProcessor {
+public class InputHandler extends SystemHandler{
 	
 	/**
 	 * Message type for input messages
@@ -33,7 +32,7 @@ public class InputHandler extends MessageProcessor {
 	 * @param zMain
 	 */
 	public InputHandler(Main zMain) {
-		super("INPUT");
+		super(zMain,"INPUT");
 		
 		//And run the intro..
 		new intro().doFunction(new String[0]);
@@ -49,7 +48,7 @@ public class InputHandler extends MessageProcessor {
 			//Notify something happening..
 			Message action = new Message(ConsensusHandler.CONSENSUS_NOTIFY_ACTION);
 			action.addString("action", input);
-			Main.getMainHandler().getConsensusHandler().updateListeners(action);
+			getMainHandler().getConsensusHandler().updateListeners(action);
 			
 			//Get the response Stream
 			ResponseStream output = (ResponseStream) zMessage.getObject(INPUT_RESPONSE);
@@ -75,7 +74,7 @@ public class InputHandler extends MessageProcessor {
 					found.setResponseStream(output);
 					
 					//Set the Main handler..
-					found.setMainHandler(Main.getMainHandler());
+					found.setMainHandler(getMainHandler());
 					
 					//Do it..
 					found.doFunction(inputs);	
