@@ -90,15 +90,9 @@ public class ConsensusNet extends ConsensusProcessor {
 	}
 	
 	public void setInitialSyncComplete() {
-		setInitialSyncComplete(true);
-	}
-	
-	private void setInitialSyncComplete(boolean zPostNotify) {
 		if(!mInitialSync) {
 			mInitialSync = true;
-			if(zPostNotify) {
-				getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALSYNC));	
-			}
+			getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALSYNC));	
 		}
 	}
 	
@@ -244,6 +238,9 @@ public class ConsensusNet extends ConsensusProcessor {
 				
 				//Reset weights
 				getMainDB().hardResetChain();
+			
+				//Now the Initial SYNC has been done you can receive TXPOW message..
+				setInitialSyncComplete();
 				
 				//FOR NOW
 				TxPoW tip = getMainDB().getMainTree().getChainTip().getTxPow();
@@ -257,9 +254,6 @@ public class ConsensusNet extends ConsensusProcessor {
 				
 				//Backup the system..
 				getConsensusHandler().PostTimerMessage(new TimerMessage(2000,ConsensusBackup.CONSENSUSBACKUP_BACKUP));
-				
-				//Now the Initial SYNC has been done you can receive TXPOW message..
-				setInitialSyncComplete(false);
 				
 				//Do you want a copy of ALL the TxPoW in the Blocks.. ? Only really useful for txpowsearch - DEXXED
 				if(mFullSyncOnInit) {
@@ -288,9 +282,6 @@ public class ConsensusNet extends ConsensusProcessor {
 						MinimaLogger.log("Requested "+reqtxn+" transaction in Initial Blocks..");	
 					}
 				}
-				
-				//NOW - post a notify message..
-				getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALSYNC));
 			}
 			
 		}else if(zMessage.isMessageType(CONSENSUS_NET_GREETING)) {
@@ -378,9 +369,6 @@ public class ConsensusNet extends ConsensusProcessor {
 			//Get the NetClient...
 			MinimaClient client = (MinimaClient) zMessage.getObject("netclient");
 			
-			//Now the Initial SYNC has been done you can receive TXPOW message..
-			setInitialSyncComplete(false);
-			
 			//Cycle through and add as a normal message - extra transactions will be requested as normal
 			ArrayList<TxPoW> txps = txplist.getList();
 			for(TxPoW txp : txps) {
@@ -390,8 +378,8 @@ public class ConsensusNet extends ConsensusProcessor {
 				getConsensusHandler().PostMessage(msg);
 			}
 			
-			//NOW - post a notify message..
-			getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALSYNC));
+			//Now the Initial SYNC has been done you can receive TXPOW message..
+			setInitialSyncComplete();
 			
 			//Do a complete backup..
 			getConsensusHandler().PostTimerMessage(new TimerMessage(20000,ConsensusBackup.CONSENSUSBACKUP_BACKUP));
