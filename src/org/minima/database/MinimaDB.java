@@ -396,9 +396,6 @@ public class MinimaDB {
 	 * @param zParentID
 	 */
 	private void addTreeChildren(MiniData zParentID) {
-		/**
-		 * Recursive.. BAD
-		 */
 //		ArrayList<TxPOWDBRow> unused_children = mTxPOWDB.getChildBlocksTxPOW(zParentID);
 //		for(TxPOWDBRow txp : unused_children) {
 //			//We can now add this one..
@@ -409,7 +406,7 @@ public class MinimaDB {
 //		}
 		
 		/**
-		 * NON-RECURSIVE METHOD..
+		 * NEW NON-RECURSIVE METHOD..
 		 */
 		//Create a new stack of block ids to check..
 		ObjectStack stack = new ObjectStack();
@@ -436,6 +433,7 @@ public class MinimaDB {
 		        }
 			}
 		}
+		
 	}
 	
 	public TxPoW findBlockForTransaction(TxPoW zTxPoWTransaction) {
