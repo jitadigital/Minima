@@ -43,8 +43,6 @@ public class CommsClientReader implements Runnable {
 	public void run() {
 		DataInputStream input = null;
 		
-		String error = "";
-		
 		try {
 			//Create an input stream
 			input = new DataInputStream(new BufferedInputStream(mCommsClient.getSocket().getInputStream()));
@@ -61,9 +59,7 @@ public class CommsClientReader implements Runnable {
 			
 		}catch(Exception exc) {
 			//General Exception	
-			error = exc.toString();
-			
-			//MinimaLogger.log("COMMSCLIENTREADER ERROR.. "+exc);
+			MinimaLogger.log("COMMSCLIENTREADER ERROR.. "+exc);
 			//exc.printStackTrace();
 		
 		}finally {
