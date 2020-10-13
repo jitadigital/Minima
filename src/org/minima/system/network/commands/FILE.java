@@ -25,14 +25,26 @@ public class FILE implements Runnable {
 	String mCommand;
 	String mMiniDAPPID;
 	
+	//Call back with the response when finished
+	Function   mCallback;
+	Context    mContext;
+	Scriptable mScope;
+	
 	//The Final Result..
 	String mFinalResult = "";
 		
 	public FILE(String zCommand, String zMiniDAPPID) {
-		mCommand    = zCommand;
-		mMiniDAPPID = zMiniDAPPID;
+		this(zCommand, zMiniDAPPID, null,null,null);
 	}
 	
+	public FILE(String zCommand, String zMiniDAPPID, Function zCallback, Context zContext, Scriptable zScope) {
+		mCommand    = zCommand;
+		mMiniDAPPID = zMiniDAPPID;
+		mCallback   = zCallback;
+		mContext    = zContext;
+		mScope      = zScope;
+	}
+
 	public String getFinalResult() {
 		return mFinalResult;
 	}
@@ -151,5 +163,18 @@ public class FILE implements Runnable {
 		
 		//Convert to Text
 		mFinalResult = response.toString();
+		
+		
+		//Call the JS function
+		if(mCallback != null) {		
+			//Create a native JSON
+			Object json = MiniJSONUtility.makeJSONObject(mFinalResult, mContext, mScope);
+			
+			//Make a function variable list
+			Object functionArgs[] = { json };
+		    
+			//Call the function..
+			mCallback.call(mContext, mScope, mScope, functionArgs);
+		}
 	}
 }
