@@ -37,6 +37,11 @@ public class BlockTree {
 	BlockTreeNode mCascadeNode;
 	
 	/**
+	 * When searching for the tip.. 
+	 */
+	BlockTreeNode _mOldTip;
+	
+	/**
 	 * When Copying..
 	 */
 	BlockTreeNode mCopyNode;
@@ -167,25 +172,11 @@ public class BlockTree {
 	}
 	
 	/**
-	 * Resets the weights in the tree
-	 */
-	public void resetWeights() {
-		//First default them
-		zeroWeights();
-	
-		//Start at root..
-		_cascadeWeights();
-		
-		//And get the tip..
-		mTip = _getHeaviestBranchTip();		
-	}
-	
-	/**
 	 * Set all the weights to 0 - and remake the fastlink table
 	 */
 	public void zeroWeights() {
 		//Clear the current table..
-		mFastLink.clear();
+		mFastLink       = new Hashtable<>();
 		mValidBlockList.clear();	
 		
 		//Go down the whole tree..
@@ -206,6 +197,31 @@ public class BlockTree {
 		});
 	}
 	
+	/**
+	 * Resets the weights in the tree
+	 */
+	public void resetWeights() {
+		resetWeights(true);
+	}
+	
+	public void resetWeights(boolean zZeroWeights) {
+		//Store the Old Tip
+		_mOldTip = mTip;
+		
+		if(zZeroWeights) {
+			//First default them
+			zeroWeights();
+		}
+		
+		//Start at root..
+		_cascadeWeights();
+		
+		//And get the tip..
+		mTip = _getHeaviestBranchTip();		
+	}
+	
+	
+	
 	private void addFastLinkNode(BlockTreeNode zNode) {
 		//Add to the HashTable
 		String id = zNode.getTxPowID().to0xString();
@@ -215,10 +231,10 @@ public class BlockTree {
 	}
 	
 	/**
-	 * Calculate the correct weights per block on the chain using GHOST
+	 * Calculate the correct weights per block on the chain
 	 */
 	private void _cascadeWeights() {
-		//Order the list in the array.. from top to bottom..
+		//Order the list in an array.. from top to bottom..
 		mValidBlockList.sort(new Comparator<BlockTreeNode>() {
 			@Override
 			public int compare(BlockTreeNode o1, BlockTreeNode o2) {
@@ -236,6 +252,47 @@ public class BlockTree {
 				}
 			}
 		}
+		
+//		//OLD METHOD..
+//		//First lets stream up the OLD main chain.. OPTIMISATION
+//		if(_mOldTip != null) {
+//			BigInteger weight         = _mOldTip.getWeight();
+//			_mOldTip.mCascadeWeighted = true;
+//			
+//			//Add to all the parents..
+//			BlockTreeNode parent = _mOldTip.getParent();
+//			while(parent != null) {
+//				//A new cascading weight
+//				BigInteger newweight = weight.add(parent.getWeight()); 
+//				
+//				//Add to this parent..
+//				parent.mCascadeWeighted = true;
+//				parent.addToTotalWeight(weight);
+//				parent = parent.getParent();
+//				
+//				//Set the new weight
+//				weight = newweight;
+//			}
+//		}
+//		
+//		//Add all the weights up..
+//		_recurseTree(new NodeAction() {
+//			@Override
+//			public void runAction(BlockTreeNode zNode) {
+//				//Only add valid blocks
+//				if(zNode.getState() == BlockTreeNode.BLOCKSTATE_VALID && !zNode.mCascadeWeighted) {
+//					//The weight of this block
+//					BigInteger weight = zNode.getWeight();
+//					
+//					//Add to all the parents..
+//					BlockTreeNode parent = zNode.getParent();
+//					while(parent != null) {
+//						parent.addToTotalWeight(weight);
+//						parent = parent.getParent();
+//					}
+//				}
+//			}
+//		});
 	}
 	
 	/**
