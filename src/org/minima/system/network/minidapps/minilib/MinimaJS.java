@@ -32,7 +32,7 @@ public class MinimaJS {
 		mBackBone = zBackBone;
 		
 		file = new JSFile(mBackBone);
-		net  = new JSNet(mBackBone);
+		net  = new JSNet();
 		util = new JSUtil();
 	}
 	
