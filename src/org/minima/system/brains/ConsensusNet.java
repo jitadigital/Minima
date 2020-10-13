@@ -26,7 +26,6 @@ import org.minima.system.network.NetClient;
 import org.minima.system.network.NetClientReader;
 import org.minima.system.txpow.TxPoWChecker;
 import org.minima.utils.Crypto;
-import org.minima.utils.MiniFile;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.messages.Message;
 import org.minima.utils.messages.TimerMessage;
@@ -187,7 +186,8 @@ public class ConsensusNet extends ConsensusProcessor {
 				getMainDB().getTxPowDB().ClearDB();
 				
 				//Wipe the txpow folder..
-				BackupManager.safeDelete(backup.getBackUpFolder());
+				File txfolder = backup.getBackUpFolder(); 
+				BackupManager.deleteFileOrFolder(txfolder);
 				
 				//Drill down 
 				ArrayList<SyncPacket> packets = sp.getAllNodes();

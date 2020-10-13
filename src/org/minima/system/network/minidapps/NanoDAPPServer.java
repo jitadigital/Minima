@@ -98,7 +98,7 @@ public class NanoDAPPServer extends NanoHTTPD{
 					File appfolder = new File(mDAPPManager.getMiniDAPPSFolder(),uninst);
 				
 					//Delete the app root..
-					BackupManager.safeDelete(appfolder);
+					BackupManager.deleteFileOrFolder(appfolder);
 					
 					//Recalculate the MINIDAPPS
 					mDAPPManager.recalculateMiniDAPPS();
@@ -116,7 +116,7 @@ public class NanoDAPPServer extends NanoHTTPD{
 				}else if(fileRequested.startsWith("minidapps/")) {
 					//Send the MiniDAPP!
 					String fullfile = mDAPPManager.getMiniDAPPSFolder()+"/"+fileRequested.substring(10);
-					byte[] file     = MiniFile.readCompleteFile(new File(fullfile));
+					byte[] file     = MiniFile.getFileBytes(fullfile);
 					
 					if(file.length>0) {
 						return getOKResponse(file, MiniFile.getContentType(fullfile));
@@ -165,7 +165,7 @@ public class NanoDAPPServer extends NanoHTTPD{
 		            String minidappfile = files.get("minidapp");
 		            
 		            //Load the file..
-		            byte[] file = MiniFile.readCompleteFile(new File(minidappfile));
+		            byte[] file = MiniFile.getFileBytes(minidappfile);
 					
 		            //Create a MiniData Object..
 		            MiniData dapp = new MiniData(file);
@@ -179,7 +179,7 @@ public class NanoDAPPServer extends NanoHTTPD{
 	                
 				}else if(fileRequested.startsWith("minidapps/")) {
 					String fullfile = mDAPPManager.getMiniDAPPSFolder()+"/"+fileRequested.substring(10);
-					byte[] file     = MiniFile.readCompleteFile(new File(fullfile));
+					byte[] file     = MiniFile.getFileBytes(fullfile);
 					
 					if(file.length>0) {
 						return getOKResponse(file, MiniFile.getContentType(fullfile));
