@@ -31,16 +31,12 @@ public class StateVariable implements Streamable {
 	MiniByte mKeepMMR;
 	
 	/**
-	 * Port and Data and do you store long term..
+	 * Port and Data..
 	 * 
 	 * @param zPort
 	 * @param zData
 	 */
 	public StateVariable(int zPort, String zData) {
-		this(zPort, zData, MiniByte.TRUE);
-	}
-	
-	public StateVariable(int zPort, String zData, MiniByte zKeepMMR) {
 		mPort	  = new MiniByte(zPort);
 		
 		//Cannot add Mx addresses.. only HEX addresses in SCRIPT
@@ -52,7 +48,7 @@ public class StateVariable implements Streamable {
 		}
 		
 		//deafults to true
-		mKeepMMR = zKeepMMR;
+		mKeepMMR = MiniByte.TRUE;
 	}
 	
 	private StateVariable() {}
