@@ -4,7 +4,7 @@
 curl 127.0.0.1:9002/quit
 
 #Give it a second
-sleep 3
+sleep 5
 
 #Stop using the hard way
 kill $(ps aux | grep minima | awk '{print $2}')
