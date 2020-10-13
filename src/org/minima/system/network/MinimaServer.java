@@ -71,7 +71,7 @@ public class MinimaServer implements Runnable{
 				Socket clientsock = mServerSocket.accept();
 				
 				//create a new Client..
-				MinimaClient client = new MinimaClient(clientsock, mNetwork);
+				NetClient client = new NetClient(clientsock, mNetwork);
 				
 				//Tell the network Handler
 				mNetwork.PostMessage(new Message(NetworkHandler.NETWORK_NEWCLIENT).addObject("client", client));

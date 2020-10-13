@@ -61,7 +61,7 @@ public class NetworkHandler extends SystemHandler{
 	/**
 	 * All the network channels..
 	 */
-	ArrayList<MinimaClient> mClients 	= new ArrayList<>();
+	ArrayList<NetClient> mClients 	= new ArrayList<>();
 	
 	/**
 	 * Is reconnect enabled or not ?
@@ -160,7 +160,7 @@ public class NetworkHandler extends SystemHandler{
 			try {mWebSocketManager.stop();}catch(Exception exc) {}
 			
 			//Shutdown all the clients
-			for(MinimaClient client : mClients) {
+			for(NetClient client : mClients) {
 				client.stopMessageProcessor();
 			}
 			
@@ -212,7 +212,7 @@ public class NetworkHandler extends SystemHandler{
 			MinimaLogger.log("Attempting to connect to "+host+":"+port);
 			
 			//Create a NetClient
-			MinimaClient client = new MinimaClient(host, port, this);
+			NetClient client = new NetClient(host, port, this);
 			
 			//Store with the rest
 			PostMessage(new Message(NETWORK_NEWCLIENT).addObject("client", client));
@@ -223,12 +223,12 @@ public class NetworkHandler extends SystemHandler{
 		}else if(zMessage.isMessageType(NETWORK_RECONNECT)) {
 			//Disconnect and reconnect
 			JSONArray shut = new JSONArray();
-			for(MinimaClient client : mClients) {
+			for(NetClient client : mClients) {
 				//get the UID
 				shut.add(client.getUID());
 				
 				//tell it to shut down..
-				client.PostMessage(MinimaClient.NETCLIENT_SHUTDOWN);
+				client.PostMessage(NetClient.NETCLIENT_SHUTDOWN);
 			}
 			
 			InputHandler.getResponseJSON(zMessage).put("total", shut.size());
@@ -238,13 +238,13 @@ public class NetworkHandler extends SystemHandler{
 		}else if(zMessage.isMessageType(NETWORK_DISCONNECT)) {
 			String uid = zMessage.getString("uid");
 			
-			for(MinimaClient client : mClients) {
+			for(NetClient client : mClients) {
 				if(client.getUID().equals(uid)) {
 					//Don;t want to reconnect if we choose to disconnect
 					client.noReconnect();
 					
 					//tell it to shut down..
-					client.PostMessage(MinimaClient.NETCLIENT_SHUTDOWN);
+					client.PostMessage(NetClient.NETCLIENT_SHUTDOWN);
 			
 					InputHandler.endResponse(zMessage, true, "Client "+uid+" disconnected - won't reconnect");
 					
@@ -256,14 +256,14 @@ public class NetworkHandler extends SystemHandler{
 			
 		}else if(zMessage.isMessageType(NETWORK_NEWCLIENT)) {
 			//get the client
-			MinimaClient client = (MinimaClient)zMessage.getObject("client");
+			NetClient client = (NetClient)zMessage.getObject("client");
 			
 			//Add it
 			mClients.add(client);
 			
 		}else if(zMessage.isMessageType(NETWORK_CLIENTERROR)) {
 			//get the client
-			MinimaClient client = (MinimaClient)zMessage.getObject("client");
+			NetClient client = (NetClient)zMessage.getObject("client");
 			
 			//Is it a reconnect-er ?
 			boolean reconnect = client.isReconnect();
@@ -285,14 +285,14 @@ public class NetworkHandler extends SystemHandler{
 			mClients.remove(client);
 		
 			//Shut him down..
-			client.PostMessage(new Message(MinimaClient.NETCLIENT_SHUTDOWN));
+			client.PostMessage(new Message(NetClient.NETCLIENT_SHUTDOWN));
 			
 		}else if(zMessage.isMessageType(NETWORK_TRACE)) {
 			boolean traceon = zMessage.getBoolean("trace");
 			
 			setLOG(traceon);
 			
-			for(MinimaClient client : mClients) {
+			for(NetClient client : mClients) {
 				client.setLOG(traceon);
 			}
 		
@@ -301,13 +301,13 @@ public class NetworkHandler extends SystemHandler{
 			Message msg = (Message)zMessage.getObject("message");
 			
 			//Send to all the clients..
-			for(MinimaClient client : mClients) {
+			for(NetClient client : mClients) {
 				client.PostMessage(msg);
 			}
 		}
 	}
 	
-	public ArrayList<MinimaClient> getNetClients() {
+	public ArrayList<NetClient> getNetClients() {
 		return mClients;
 	}
 	
