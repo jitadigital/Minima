@@ -514,10 +514,8 @@ public class ConsensusUser extends ConsensusProcessor {
 				hard = zMessage.getBoolean("hard");	
 			}
 			
-			NetworkHandler nethandler = getNetworkHandler();
-			
 			//Clear the current Requested Transactions.. this should ask for them all anyway..
-			nethandler.clearAllrequestedTxPow();
+			getConsensusHandler().getMainHandler().getNetworkHandler().clearAllrequestedTxPow();
 			
 			//JSON response..
 			JSONObject resp = InputHandler.getResponseJSON(zMessage);
@@ -525,6 +523,8 @@ public class ConsensusUser extends ConsensusProcessor {
 			
 			//TxPOW DB
 			TxPowDB tdb = getMainDB().getTxPowDB();
+			
+			NetworkHandler nethandler = getConsensusHandler().getMainHandler().getNetworkHandler();
 			
 			//Check the MEMPOOL transactions..
 			ArrayList<TxPOWDBRow> unused = tdb.getAllUnusedTxPOW();
