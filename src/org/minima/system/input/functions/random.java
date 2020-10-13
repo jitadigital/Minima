@@ -22,7 +22,7 @@ public class random extends CommandFunction{
 		
 		//Create a message
 		Message sender = getResponseMessage(ConsensusPrint.CONSENSUS_RANDOM);
-		sender.addInteger("length", len);
+		sender.addInt("length", len);
 		
 		//Send it to the miner..
 		getMainHandler().getConsensusHandler().PostMessage(sender);

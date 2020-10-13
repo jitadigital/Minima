@@ -16,7 +16,7 @@ public class txnlist extends CommandFunction {
 		Message list = getResponseMessage(ConsensusTxn.CONSENSUS_TXNLIST);
 		if(zInput.length>1) {
 			int txn = Integer.parseInt(zInput[1]);
-			list.addInteger("transaction",txn);
+			list.addInt("transaction",txn);
 		}
 		
 		getMainHandler().getConsensusHandler().PostMessage(list);

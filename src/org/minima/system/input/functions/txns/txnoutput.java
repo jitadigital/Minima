@@ -48,14 +48,14 @@ public class txnoutput extends CommandFunction {
 		
 		// Send to the consensus Handler
 		Message msg = getResponseMessage(ConsensusTxn.CONSENSUS_TXNOUTPUT);
-		msg.addInteger("transaction", txn);
+		msg.addInt("transaction", txn);
 		msg.addString("value", value);
 		msg.addObject("address", addr);
 		msg.addString("tokenid", tokenid);
 
 		if(zInput.length>5) {
 			int position = Integer.parseInt(zInput[5]); 
-			msg.addInteger("position", position);
+			msg.addInt("position", position);
 		}
 		
 		getMainHandler().getConsensusHandler().PostMessage(msg);

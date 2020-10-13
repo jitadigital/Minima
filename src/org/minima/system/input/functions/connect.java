@@ -19,7 +19,7 @@ public class connect extends CommandFunction{
 		
 		//Connect to a specific host:port
 		Message connect  = getResponseMessage(NetworkHandler.NETWORK_CONNECT);
-		connect.addInteger("port", port).addString("host", host);
+		connect.addInt("port", port).addString("host", host);
 		getMainHandler().getNetworkHandler().PostMessage(connect);
 	}
 

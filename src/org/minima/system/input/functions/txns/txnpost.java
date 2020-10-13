@@ -18,7 +18,7 @@ public class txnpost extends CommandFunction {
 		
 		//Send to the consensus Handler
 		Message msg = getResponseMessage(ConsensusTxn.CONSENSUS_TXNPOST);
-		msg.addInteger("transaction", txn);
+		msg.addInt("transaction", txn);
 	
 		getMainHandler().getConsensusHandler().PostMessage(msg);
 	}

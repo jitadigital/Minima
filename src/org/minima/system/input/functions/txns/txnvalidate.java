@@ -18,7 +18,7 @@ public class txnvalidate extends CommandFunction{
 		
 		//Send to the consensus Handler
 		Message msg = getResponseMessage(ConsensusTxn.CONSENSUS_TXNVALIDATE);
-		msg.addInteger("transaction", txn);
+		msg.addInt("transaction", txn);
 	
 		getMainHandler().getConsensusHandler().PostMessage(msg);		
 	}
