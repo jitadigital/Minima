@@ -431,12 +431,22 @@ public class ConsensusHandler extends SystemHandler {
 				return;
 			}
 			
+			
+			//CHECK THE SIZE
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(baos);
+			txpow.writeDataStream(dos);
+			dos.flush();
+			int txpowsize = baos.toByteArray().length;
+			dos.close();
+			baos.close();
+			
 			//Add the size..
-			resp.put("size", txpow.getSizeinBytes());
+			resp.put("size", txpowsize);
 			resp.put("inputs", txpow.getTransaction().getAllInputs().size());
 			resp.put("outputs", txpow.getTransaction().getAllOutputs().size());
 			
-			if(txpow.getSizeinBytes() > MinimaReader.MAX_TXPOW) {
+			if(txpowsize > MinimaReader.MAX_TXPOW) {
 				//Add the TxPoW
 				resp.put("transaction", txpow.getTransaction());
 				
