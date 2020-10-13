@@ -12,9 +12,7 @@ import java.util.StringTokenizer;
 
 import org.minima.system.backup.BackupManager;
 import org.minima.system.input.InputHandler;
-import org.minima.system.network.commands.CMD;
-import org.minima.system.network.commands.SQL;
-import org.minima.utils.MinimaLogger;
+import org.minima.system.network.minidapps.minilib.Command;
 import org.minima.utils.SQLHandler;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
@@ -81,12 +79,17 @@ public class RPCHandler implements Runnable {
 	        			MiniDAPPID = input.substring(start, end);
 	        		}
 				}
+//				System.out.println("Header : "+input);
 				input = in.readLine();
 			}
+//			if(!MiniDAPPID.equals("")) {
+//				System.out.println("MiniDAPPID:"+MiniDAPPID);	
+//			}
 			
 			// Currently we support only GET
 			if (method.equals("GET")){
 //				System.out.println("fileRequested : "+fileRequested);
+				
 				//decode URL message
 				String function = URLDecoder.decode(fileRequested,"UTF-8").trim();
 				if(function.startsWith("/")) {
@@ -96,22 +99,71 @@ public class RPCHandler implements Runnable {
 				//The final result
 				String finalresult = "";
 				
+				BackupManager backup = InputHandler.getMainInputHandler().getMainHandler().getBackupManager();
+				
 				//Is this a SQL function
 				if(function.startsWith("sql/")) {
-					//Get the SQL function
-					function = function.substring(4).trim();
+					//The SQL results
+					JSONObject res = new JSONObject();
 					
-					//Create a SQL object
-					SQL sql = new SQL(function, MiniDAPPID);
+					//Where is the database..
+					File minidappdatabase = null;
 					
-					//Run it..
-					sql.run();
+					//Which Database.. could be running from a folder..
+					if(MiniDAPPID.equals("")) {
+						//Get the database folder
+						File temp = backup.getTempFolder();
+						minidappdatabase = new File(temp,"_tempdb"+InputHandler.getMainInputHandler().RANDOM_VAL.to0xString());
+						
+					}else {
+						//Get the database folder
+						File minidapps   = backup.getMiniDAPPFolder();
+						File dapp        = new File(minidapps,MiniDAPPID);
+						
+						File dbdir       = new File(dapp,"sql");
+						dbdir.mkdirs();
+						
+						minidappdatabase = new File(dbdir,"_sqldb");
+					}
 					
-					//Get the Response..
-	            	finalresult = sql.getFinalResult();
+					//Get the Function..
+					String sql = function.substring(4).trim();
+					res.put("db", minidappdatabase.getAbsolutePath());
+					res.put("sql", sql);
+					
+				    //Now lets do some SQL
+					try {
+						//Start the SQL handler
+						SQLHandler handler = new SQLHandler(minidappdatabase.getAbsolutePath());
+							
+						//Run the SQL..
+						if(sql.indexOf(";")!=-1) {
+							JSONArray resp  = handler.executeMultiSQL(sql);
+							res.put("status", true);
+							res.put("response", resp);
+						}else {
+							JSONObject resp = handler.executeSQL(sql);	
+							res.put("status", true);
+							res.put("response", resp);
+						}
+						
+						//Close it..
+						handler.close();
+						
+					}catch (SQLException e) {
+						res.put("status", false);
+						res.put("message", e.toString());
+					}
+					
+					//The response returned..
+					finalresult = res.toString();
 					
 				}else{
-					CMD cmd = new CMD(function.trim());
+					//trim it..
+					function = function.trim();
+
+	            	//Create a Command
+	            	Command cmd = new Command(function);
 	            	
 	            	//Run it..
 	            	cmd.run();
@@ -130,13 +182,10 @@ public class RPCHandler implements Runnable {
 				out.println(); // blank line between headers and content, very important !
 				out.println(finalresult);
 				out.flush(); // flush character output stream buffer
-			
-			}else {
-				MinimaLogger.log("Unsupported Method in RPCHandler : "+method);
 			}
 			
 		} catch (Exception ioe) {
-			ioe.printStackTrace();
+			System.err.println("Server error : " + ioe);
 			
 		} finally {
 			try {

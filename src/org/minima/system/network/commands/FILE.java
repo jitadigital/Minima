@@ -1,4 +1,4 @@
-package org.minima.system.network.commands;
+package org.minima.system.network.minidapps.minilib;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,34 +6,20 @@ import java.io.IOException;
 import org.minima.objects.base.MiniString;
 import org.minima.system.backup.BackupManager;
 import org.minima.system.input.InputHandler;
-import org.minima.system.network.minidapps.minilib.BackEndDAPP;
-import org.minima.system.network.minidapps.minilib.JSMiniLibUtil;
-import org.minima.utils.FileUtil;
 import org.minima.utils.MiniFile;
+import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
-import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.Scriptable;
 
-public class FILE {
+public class JSFile {
 
-	private String mMiniDAPPID;
 	private BackEndDAPP mBackBone;
 	
-	public FILE(BackEndDAPP zBackBone) {
-		this(zBackBone, zBackBone.getMiniDAPPID());
-	}
-	
-	public FILE(String zMiniDAPPID) {
-		this(null,zMiniDAPPID);
-	}
-	
-	public FILE(BackEndDAPP zBackBone, String zMiniDAPPID) {
+	public JSFile(BackEndDAPP zBackBone) {
 		mBackBone   = zBackBone;
-		mMiniDAPPID = zMiniDAPPID;
 	}
 	
 	/**
@@ -47,12 +33,12 @@ public class FILE {
 		String text = "";
 		if(zObject instanceof NativeObject) {
 			NativeObject nativeObject = (NativeObject)zObject;
-			JSONObject json = JSMiniLibUtil.toJsonObject(nativeObject);
+			JSONObject json = JSUtil.toJsonObject(nativeObject);
 			text = json.toString();
 		
 		}else if(zObject instanceof NativeArray) {
 			NativeArray nativeObject = (NativeArray)zObject;
-			JSONArray json = JSMiniLibUtil.toJsonArray(nativeObject);
+			JSONArray json = JSUtil.toJsonArray(nativeObject);
 			text = json.toString();
 		}
 		
@@ -64,7 +50,7 @@ public class FILE {
 		
 		//get the MinDAPP Folder..
 		File mini = back.getMiniDAPPFolder();
-		File dapp = new File(mini,mMiniDAPPID);
+		File dapp = new File(mini,mBackBone.getMiniDAPPID());
 		File fdir = new File(dapp,"files");
 		fdir.mkdirs();
 		
@@ -81,7 +67,7 @@ public class FILE {
 		}
 		
 		//Now send the result back vis the callback..
-		if(zCallback != null && mBackBone != null) {
+		if(zCallback != null) {
 			//Make a function variable list
 			Object functionArgs[] = { };
 		    
@@ -95,62 +81,7 @@ public class FILE {
 	 * @param zFilename
 	 * @param zCallback
 	 */
-	public void load(String zFilename, Function zCallback) {
-		//Get the Backup mnager
-		BackupManager back = InputHandler.getMainInputHandler().getMainHandler().getBackupManager();
-		
-		//get the MinDAPP Folder..
-		File mini     = back.getMiniDAPPFolder();
-		File dapp     = new File(mini,mMiniDAPPID);
-		File fdir     = new File(dapp,"files");
-		File savefile = new File(fdir,zFilename);
-		
-		//The response
-		JSONObject response = new JSONObject();
-		response.put("file", zFilename);
-		
-		if(!savefile.exists()) {
-			response.put("exists", false);
-		}else {
-			response.put("exists", true);
-			
-			//Load the data..
-			byte[] data;
-			try {
-				data = MiniFile.readCompleteFile(savefile);
-			
-				//Convert it to a MiniString
-				MiniString json = new MiniString(data);
-				
-				//Add it to the JSON
-				response.put("data", json.toString());
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-				//Something went wrong
-				response.put("exists", false);
-				response.put("exception",e.toString());
-			}
-		}
-	
-		//Final text
-		String ftext = response.toString(); 
-		
-		//Get the JS components
-		Context context  = mBackBone.getContext();
-		Scriptable scope = mBackBone.getScope();
-		
-		//Create a native JSON
-		Object json = JSMiniLibUtil.makeJSONObject(ftext, context, scope);
-		
-		//Make a function variable list
-		Object functionArgs[] = { json };
-	    
-		//Call the function..
-		zCallback.call(context, scope, scope, functionArgs);
-	}
+	public void load(String zFilename, Function zCallback) {}
 	
 	/**
 	 * Delete a file..
@@ -160,27 +91,7 @@ public class FILE {
 		delete(zFilename,null);
 	}
 	
-	public void delete(String zFilename, Function zCallback) {
-		//Get the Backup mnager
-		BackupManager back = InputHandler.getMainInputHandler().getMainHandler().getBackupManager();
-		
-		//get the MinDAPP Folder..
-		File mini     = back.getMiniDAPPFolder();
-		File dapp     = new File(mini,mMiniDAPPID);
-		File fdir     = new File(dapp,"files");
-		File savefile = new File(fdir,zFilename);
-		
-		savefile.delete();
-		
-		//Now send the result back vis the callback..
-		if(zCallback != null && mBackBone != null) {
-			//Make a function variable list
-			Object functionArgs[] = { };
-		    
-			//Call the function..
-			zCallback.call(mBackBone.getContext(), mBackBone.getScope(), mBackBone.getScope(), functionArgs);
-		}
-	}
+	public void delete(String zFilename, Function zCallback) {}
 
 	
 	/**
@@ -195,13 +106,15 @@ public class FILE {
 		
 		//get the MinDAPP Folder..
 		File mini = back.getMiniDAPPFolder();
-		File dapp = new File(mini,mMiniDAPPID);
+		File dapp = new File(mini,mBackBone.getMiniDAPPID());
 		File fdir = new File(dapp,"files");
 		fdir.mkdirs();
 		
 		//Now add the zFolder..
 		File checker = new File(fdir,zFolder);
 		File[] files = checker.listFiles();
+		
+		
 		
 	}
 }
