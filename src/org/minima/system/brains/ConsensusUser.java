@@ -526,13 +526,11 @@ public class ConsensusUser extends ConsensusProcessor {
 			ArrayList<TxPOWDBRow> unused = tdb.getAllUnusedTxPOW();
 			int tested = unused.size();
 			ArrayList<MiniData> remove = new ArrayList<>();
-			JSONArray found     = new JSONArray();
 			JSONArray requested = new JSONArray();
 			
 			//Check them all..
 			for(TxPOWDBRow txrow : unused) {
 				TxPoW txpow    = txrow.getTxPOW();
-				found.add(txpow.getTxPowID().to0xString());
 				
 				//Do we just remove them all.. ?
 				if(hard) {
@@ -596,8 +594,7 @@ public class ConsensusUser extends ConsensusProcessor {
 			}
 			
 			//Now you have the proof..
-			resp.put("number", tested);
-			resp.put("found", found);
+			resp.put("found", tested);
 			resp.put("removed", rem);
 			resp.put("requested", requested);
 			InputHandler.endResponse(zMessage, true, "Mempool Flushed");
