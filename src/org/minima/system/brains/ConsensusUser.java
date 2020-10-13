@@ -514,10 +514,6 @@ public class ConsensusUser extends ConsensusProcessor {
 				hard = zMessage.getBoolean("hard");	
 			}
 			
-			//Clear the current Requested Transactions.. this should ask for them all anyway..
-			getConsensusHandler().getMainHandler().getNetworkHandler().clearAllrequestedTxPow();
-			
-			//JSON response..
 			JSONObject resp = InputHandler.getResponseJSON(zMessage);
 			resp.put("hard", hard);
 			
