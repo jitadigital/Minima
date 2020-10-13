@@ -92,7 +92,6 @@ public class Start {
 		boolean genesis 		= false;
 		boolean daemon          = false;
 		boolean noreset 		= false;
-		boolean automine 		= false;
 		
 		//Configuration folder
 		File conf = new File(System.getProperty("user.home"),".minima");
@@ -125,7 +124,6 @@ public class Start {
 					MinimaLogger.log("        -private               : Run a private chain. Don't connect to MainNet. Create a genesis tx-pow. Simulate some users.");
 					MinimaLogger.log("        -clean                 : Wipe user files and chain backup. Start afresh. Use with -private for clean private test-net.");
 					MinimaLogger.log("        -noreset               : Won't reset the chain if another heavier chain comes along..");
-					MinimaLogger.log("        -automine              : Simulate users mining the chain");
 					MinimaLogger.log("        -noconnect             : Don't connect to MainNet. Can then connect to private chains.");
 					MinimaLogger.log("        -connect [host] [port] : Don't connect to MainNet but connect to this node instead.");
 					MinimaLogger.log("        -daemon                : Accepts no input from STDIN. Can run in background process.");
@@ -139,7 +137,6 @@ public class Start {
 					genesis     = true;
 					connect 	= false;
 					noreset     = true;
-					automine    = true;
 					
 				}else if(arg.equals("-noconnect")) {
 					connect = false;
@@ -149,9 +146,6 @@ public class Start {
 				
 				}else if(arg.equals("-noreset")) {
 					noreset = true;
-				
-				}else if(arg.equals("-automine")) {
-					automine = true;
 				
 				}else if(arg.equals("-connect")) {
 					connect = true;
@@ -195,10 +189,6 @@ public class Start {
 		
 		if(noreset) {
 			rcmainserver.noChainReset();
-		}
-		
-		if(automine) {
-			rcmainserver.setAutoMine();
 		}
 		
 		//Start the system
