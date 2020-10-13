@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.minima.GlobalParams;
 import org.minima.database.txpowdb.TxPOWDBRow;
 import org.minima.database.txpowdb.TxPowDB;
 import org.minima.objects.TxPoW;
 import org.minima.objects.base.MiniData;
 import org.minima.objects.base.MiniNumber;
-import org.minima.utils.MinimaLogger;
 
 public class FastJavaDB implements TxPowDB {
 
@@ -115,20 +113,8 @@ public class FastJavaDB implements TxPowDB {
 				newtable.put(rowtxpow.getTxPowID().to0xString(),row);
 				
 			}else {
-				if(GlobalParams.SHORT_CHAIN_DEBUG_MODE) {
-					if(row.getTxPOW().isTransaction() && !row.isInBlock()) {
-						MinimaLogger.log("Transaction NOT in block NOT removed.. "+row);
-						
-						//Add it anyway..
-						newtable.put(rowtxpow.getTxPowID().to0xString(),row);
-					}else {
-						//Remove it..
-						removed.add(row);
-					}
-				}else {
-					//Remove it..
-					removed.add(row);	
-				}
+				//Remove it..
+				removed.add(row);
 			}		
 		}
 		
