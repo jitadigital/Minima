@@ -152,35 +152,6 @@ var Minima = {
 	},
 	
 	/**
-	 * Form GET / POST parameters..
-	 */
-	form : {
-		
-		//Return the GET parameter..
-		get : function(parameterName){
-			    var result = null,
-		        tmp = [];
-			    var items = location.search.substr(1).split("&");
-			    for (var index = 0; index < items.length; index++) {
-			        tmp = items[index].split("=");
-			        //console.log("TMP:"+tmp);
-				   if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-			    }
-			    return result;
-		}
-		
-		/*,
-		allpost : function(callback){
-			
-		},
-		
-		post : function(parametername, callback){
-			
-		}*/
-		
-	},
-	
-	/**
 	 * UTILITY FUNCTIONS
 	 */
 	util : {
@@ -320,13 +291,6 @@ function MinimaWebSocketListener(){
 	MINIMA_WEBSOCKET.onopen = function() {
 		//Connected
 		Minima.log("Minima WS Listener Connection opened..");	
-		
-		//Now set the MiniDAPPID
-		uid = { "type":"uid", "location": window.location.href };
-		
-		//Send your name.. normally set automagically but can be hard set when debugging
-		MINIMA_WEBSOCKET.send(JSON.stringify(uid));
-		//console.log("Send UID WS Message .. href:"+window.location.href);
 		
 	    //Send a message
 	    MinimaPostMessage("connected", "success");
@@ -547,4 +511,3 @@ function httpGetAsync(theUrl, callback, logenabled)
     xmlHttp.open("GET", theUrl, true); // true for asynchronous 
     xmlHttp.send(null);
 }
-
