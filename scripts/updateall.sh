@@ -9,7 +9,7 @@
 #Update the miner..
 ./update.sh minima-miner-1-vm miner
 #sleep 300
-./update.sh "minima-miner-2-vm --zone=europe-west2-a" miner
+./update.sh minima-miner-2-vm miner
 
 #Run through the public servers..
 ./update.sh minima-public-1-vm public
