@@ -18,7 +18,6 @@ import org.minima.system.backup.BackupManager;
 import org.minima.system.backup.SyncPackage;
 import org.minima.system.backup.SyncPacket;
 import org.minima.system.input.InputHandler;
-import org.minima.utils.MiniFile;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONObject;
 import org.minima.utils.messages.Message;
@@ -56,7 +55,7 @@ public class ConsensusBackup extends ConsensusProcessor {
 			//First backup the UserDB..
 			JavaUserDB userdb = (JavaUserDB) getMainDB().getUserDB();
 			File backuser     = backup.getBackUpFile(USERDB_BACKUP);
-			MiniFile.writeObjectToFile(backuser, userdb);
+			backup.writeObjectToFile(backuser, userdb);
 			
 		}else if(zMessage.isMessageType(CONSENSUSBACKUP_BACKUP)) {
 			//Return details..
@@ -75,13 +74,13 @@ public class ConsensusBackup extends ConsensusProcessor {
 			try {
 				JavaUserDB userdb = (JavaUserDB) getMainDB().getUserDB();
 				File backuser     = backup.getBackUpFile(USERDB_BACKUP);
-				MiniFile.writeObjectToFile(backuser, userdb);
+				BackupManager.writeObjectToFile(backuser, userdb);
 				details.put("userdb", backuser.getAbsolutePath());
 				
 				//Now the complete SyncPackage..
 				SyncPackage sp = getMainDB().getSyncPackage();
 				File backsync  = backup.getBackUpFile(SYNC_BACKUP);
-				MiniFile.writeObjectToFile(backsync, sp);
+				BackupManager.writeObjectToFile(backsync, sp);
 				details.put("chaindb", backsync.getAbsolutePath());
 				
 			}catch(Exception exc) {
@@ -127,7 +126,7 @@ public class ConsensusBackup extends ConsensusProcessor {
 			JavaUserDB jdb = new JavaUserDB();
 			try {
 				//Load the file into memory first - FAST
-				byte[] userdb = MiniFile.readCompleteFile(backuser);
+				byte[] userdb = BackupManager.readCompleteFile(backuser);
 				ByteArrayInputStream bais = new ByteArrayInputStream(userdb);
 				DataInputStream dis = new DataInputStream(bais);
 				
@@ -147,7 +146,7 @@ public class ConsensusBackup extends ConsensusProcessor {
 			//Load the SyncPackage
 			SyncPackage sp = new SyncPackage();
 			try {
-				byte[] chaindb = MiniFile.readCompleteFile(backsync);
+				byte[] chaindb = BackupManager.readCompleteFile(backsync);
 				ByteArrayInputStream bais = new ByteArrayInputStream(chaindb);
 				DataInputStream dis = new DataInputStream(bais);
 				
@@ -251,7 +250,7 @@ public class ConsensusBackup extends ConsensusProcessor {
 		
 		try {
 			//Load the complete file first..
-			byte[] txfile = MiniFile.readCompleteFile(zTxpowFile);
+			byte[] txfile = BackupManager.readCompleteFile(zTxpowFile);
 			
 			//Now load from memory..
 			ByteArrayInputStream bais = new ByteArrayInputStream(txfile);

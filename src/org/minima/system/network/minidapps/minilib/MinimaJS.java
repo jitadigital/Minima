@@ -6,7 +6,6 @@ import java.io.IOException;
 import org.minima.objects.base.MiniString;
 import org.minima.system.backup.BackupManager;
 import org.minima.system.input.InputHandler;
-import org.minima.utils.MiniFile;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
@@ -90,7 +89,7 @@ public class MinimaJS {
 		
 		//And store..
 		try {
-			MiniFile.writeObjectToFile(savefile, ms);
+			BackupManager.writeObjectToFile(savefile, ms);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -134,16 +133,6 @@ public class MinimaJS {
 	/**
 	 * Network Functions
 	 */
-	//Post a message to the from backend to frontend.. or vice versa
-	public void post(Object zObject) {
-		
-	}
-	
-	public void send(String zMinDAPPID, Object zObject) {
-		
-	}
-	
-
 	
 	
 }
