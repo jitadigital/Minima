@@ -1,6 +1,5 @@
 package org.minima.database.txpowtree;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +14,6 @@ import org.minima.database.txpowdb.TxPOWDBRow;
 import org.minima.objects.TxPoW;
 import org.minima.objects.base.MiniData;
 import org.minima.objects.base.MiniNumber;
-import org.minima.utils.Crypto;
 import org.minima.utils.MinimaLogger;
 
 public class BlockTree {
@@ -406,18 +404,8 @@ public class BlockTree {
 						
 						//Is it full
 						if(row.getBlockState() == TxPOWDBRow.TXPOWDBROW_STATE_FULL) {
-							//Need all ok for the block to be accepted
+							//Need allok for the block to be accepted
 							boolean allok = false;
-							
-							//The Parent block..
-							BlockTreeNode pnode = zNode.getParent();
-							
-							//Check block number..
-							if(!zNode.getBlockNumber().isEqual(pnode.getBlockNumber().increment())){
-								MinimaLogger.log("INVALID BLOCK NUMBER for Parent "+zNode.getBlockNumber());
-								zNode.setState(BlockTreeNode.BLOCKSTATE_INVALID);
-								return;
-							}
 							
 							//Check that the TIME is within acceptable parameters - 30 minutes each way
 							MiniNumber mediantime = getMedianTime(zNode, 72);
@@ -431,29 +419,7 @@ public class BlockTree {
 							}
 							
 							//Check that Block difficulty is Correct
-							MiniNumber actualspeed 	= getDB().getMainTree().getChainSpeed(pnode);
-							MiniNumber speedratio   = GlobalParams.MINIMA_BLOCK_SPEED.div(actualspeed);
-							
-							//Current average
-							BigInteger avgdiff    = getDB().getMainTree().getAvgChainDifficulty(pnode);
-							BigDecimal avgdiffdec = new BigDecimal(avgdiff);
-							
-							//Multiply by the ratio
-							BigDecimal newdiffdec = avgdiffdec.multiply(speedratio.getAsBigDecimal());
-							BigInteger newdiff    = newdiffdec.toBigInteger();
-										
-							//Check more than TX-MIN..
-							if(newdiff.compareTo(Crypto.MEGA_VAL)>0) {
-								newdiff = Crypto.MEGA_VAL;
-							}
-							MiniData diffhash = new MiniData("0x"+newdiff.toString(16)); 
-							
-							//Check they are the same!..
-							if(!zNode.getTxPow().getBlockDifficulty().isEqual(diffhash)) {
-								MinimaLogger.log("INVALID BLOCK DIFFICULTY "+zNode.getBlockNumber());
-								zNode.setState(BlockTreeNode.BLOCKSTATE_INVALID);
-								return;
-							}
+							//..TODO
 							
 							//Check the Super Block Levels are Correct! and point to the correct blocks
 							//..TODO
@@ -461,7 +427,7 @@ public class BlockTree {
 							//need a  body for this..
 							if(row.getTxPOW().hasBody()) {
 								//Create an MMR set that will ONLY be used if the block is VALID..
-								MMRSet mmrset = new MMRSet(pnode.getMMRSet());
+								MMRSet mmrset = new MMRSet(zNode.getParent().getMMRSet());
 								
 								//Set this MMR..
 								zNode.setMMRset(mmrset);
@@ -663,9 +629,9 @@ public class BlockTree {
 	 * @param zNumberFromTip
 	 * @return the blocktreenode
 	 */
-	public BlockTreeNode getPastBlock(BlockTreeNode zStartPoint, int zNumberFromTip) {
+	public BlockTreeNode getPastBlock(int zNumberFromTip) {
 		MiniNumber cascnumber = mCascadeNode.getTxPow().getBlockNumber();
-		BlockTreeNode current = zStartPoint;
+		BlockTreeNode current = mTip;
 		int tot               = 0;
 		while(current.getBlockNumber().isMore(cascnumber) && tot<zNumberFromTip) {
 			BlockTreeNode parent = current.getParent();
@@ -687,21 +653,17 @@ public class BlockTree {
 	 * Calculated as the different between the cascade node and the tip..
 	 */
 	public MiniNumber getChainSpeed() {
-		return getChainSpeed(mTip);
-	}
-	
-	public MiniNumber getChainSpeed(BlockTreeNode zStartPoint) {
 		//Use a previous block.. 
-		BlockTreeNode starter = getPastBlock(zStartPoint, GlobalParams.MINIMA_BLOCKS_SPEED_CALC.getAsInt());
+		BlockTreeNode starter = getPastBlock(GlobalParams.MINIMA_BLOCKS_SPEED_CALC.getAsInt());
 		
 		//Calculate to seconds..
 		MiniNumber start      = starter.getTxPow().getTimeSecs();
-		MiniNumber end        = zStartPoint.getTxPow().getTimeSecs();
+		MiniNumber end        = mTip.getTxPow().getTimeSecs();
 		MiniNumber timediff   = end.sub(start);
 		
 		//How many blocks..
 		MiniNumber blockstart = starter.getTxPow().getBlockNumber();
-		MiniNumber blockend   = zStartPoint.getTxPow().getBlockNumber();
+		MiniNumber blockend   = mTip.getTxPow().getBlockNumber();
 		MiniNumber blockdiff  = blockend.sub(blockstart); 
 		
 		//So.. 
@@ -717,18 +679,14 @@ public class BlockTree {
 	 * Get the current average difficulty
 	 */
 	public BigInteger getAvgChainDifficulty() {
-		return getAvgChainDifficulty(mTip);	
-	}
-	
-	public BigInteger getAvgChainDifficulty(BlockTreeNode zStartPoint) {
 		//The Total..
 		BigInteger totaldifficulty = new BigInteger("0");
 		int numberofblocks=0;
 		
 		//Cycle back from the tip..
-		BlockTreeNode starter   = getPastBlock(zStartPoint, GlobalParams.MINIMA_BLOCKS_SPEED_CALC.getAsInt());
+		BlockTreeNode starter   = getPastBlock(GlobalParams.MINIMA_BLOCKS_SPEED_CALC.getAsInt());
 		MiniNumber minblock     = starter.getTxPow().getBlockNumber();
-		BlockTreeNode current 	= zStartPoint;
+		BlockTreeNode current 	= mTip;
 				
 		while(current!=null && current.getBlockNumber().isMoreEqual(minblock)) {
 			//Add to the total
