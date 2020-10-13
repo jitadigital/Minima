@@ -178,10 +178,7 @@ public class Address implements Streamable{
 			newlen = 70;
 		
 		}else {
-			return zAddress.to0xString();
-			
-			//Hmm.. should we through an error ?
-			//throw new ArithmeticException("ERROR - Make Minima Address : not a valid length address!");
+			throw new ArithmeticException("ERROR - Make Minima Address : not a valid length address!");
 		}
 		
 		int nbytes = newlen - len;
