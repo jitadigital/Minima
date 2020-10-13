@@ -34,7 +34,6 @@ import org.minima.system.network.NetworkHandler;
 import org.minima.system.network.minidapps.DAPPManager;
 import org.minima.system.network.rpc.RPCClient;
 import org.minima.utils.Maths;
-import org.minima.utils.MiniFormat;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
@@ -165,15 +164,13 @@ public class ConsensusPrint extends ConsensusProcessor {
 			dets.put("speed", tree.getChainSpeed());
 			dets.put("difficulty", tree.getChainTip().getTxPow().getBlockDifficulty().to0xString());
 			dets.put("weight", tree.getChainRoot().getTotalWeight());
+			InputHandler.endResponse(zMessage, true, "");	
 			
 			//DEBUGGING
 			if(zMessage.exists("systemout")) {
-				String pretty = MiniFormat.JSONPretty(dets.toString());
-				MinimaLogger.log(pretty);
+				MinimaLogger.log(InputHandler.getResponseJSON(zMessage).toString());
 			}
-			
-			InputHandler.endResponse(zMessage, true, "");	
-			
+				
 		}else if(zMessage.isMessageType(CONSENSUS_TXPOWSEARCH)){
 			String inputaddr   = zMessage.getString("input");
 			String outputaddr  = zMessage.getString("output");
