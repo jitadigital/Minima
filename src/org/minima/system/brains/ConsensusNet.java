@@ -504,7 +504,7 @@ public class ConsensusNet extends ConsensusProcessor {
 				return;
 			}
 			
-			//Was it a requested.. if so gets a PASS.. 
+			//Was it a requested..
 			if(getNetworkHandler().isRequestedTxPow(txpowid)) {
 				//Requested by you.. gets a pass..
 				getNetworkHandler().removeRequestedTxPow(txpowid);
