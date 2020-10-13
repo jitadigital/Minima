@@ -259,6 +259,7 @@ public class ConsensusHandler extends MessageProcessor {
 				PostDAPPJSONMessage(newblock);
 				
 				//Do the balance.. Update listeners if changed..
+				updateListeners(new Message(CONSENSUS_NOTIFY_BALANCE));
 				PostMessage(new Message(ConsensusPrint.CONSENSUS_BALANCE).addBoolean("hard", true));
 				
 				//Print the tree..
@@ -276,8 +277,8 @@ public class ConsensusHandler extends MessageProcessor {
 				getMainDB().getUserDB().addToHistory(txpow,tokamt);
 				
 				//Do we need to update the balance.. or did we do it already..
-				updateListeners(new Message(CONSENSUS_NOTIFY_BALANCE));
 				if(!newbalance) {
+					updateListeners(new Message(CONSENSUS_NOTIFY_BALANCE));
 					PostMessage(new Message(ConsensusPrint.CONSENSUS_BALANCE).addBoolean("hard", true));
 				}				
 			}
