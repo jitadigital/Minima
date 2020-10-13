@@ -86,6 +86,8 @@ public class CascadeTree {
 		//The rest of the tree.. that we CAN cascade
 		BlockTreeNode newcascade  = newfulltree.getParent();
 		
+		MinimaLogger.log("New Cascade:"+newcascade.getBlockNumber()+" OLD:"+cascadenode.getBlockNumber());
+		
 		//Now copy all the MMR data to the old cascade..
 		newcascade.getMMRSet().copyAllParentKeepers(cascadenode.getBlockNumber());
 		
@@ -199,5 +201,7 @@ public class CascadeTree {
 		
 		//And clear it out..
 		mCascadeTree.clearCascadeBody();
+		
+		MinimaLogger.log("NEWTREE:"+mCascadeTree.getCascadeNode().getBlockNumber());
 	}
 }
