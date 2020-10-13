@@ -58,6 +58,12 @@ public class BlockTreeNode implements Comparable<BlockTreeNode> {
 	MMRSet mMMRSet = new MMRSet();
 	
 	/**
+	 * When calculating the cascade weight.. has this node been used.. 1000x speed boost..
+	 */
+	public boolean mCascadeWeighted = false;
+	public boolean mMainBranch      = false;
+	
+	/**
 	 * When loading from bloc ctore just use the TxpowID
 	 */
 	public BlockTreeNode() {}
@@ -147,6 +153,10 @@ public class BlockTreeNode implements Comparable<BlockTreeNode> {
 		
 		//Reset the total weight..
 		mTotalWeight = mWeight;
+		
+		//Not used yet..
+		mCascadeWeighted = false;
+		mMainBranch      = false;
 	}
 	
 	public BigDecimal getRealWeight() {
