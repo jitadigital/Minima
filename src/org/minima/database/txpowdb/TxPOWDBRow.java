@@ -38,8 +38,8 @@ public interface TxPOWDBRow {
 	/**
 	 * Is this a block on the main 
 	 */
-	public boolean isMainChainBlock();
-	public void setMainChainBlock(boolean zOnChainBlock);
+	public boolean isOnChainBlock();
+	public void setOnChainBlock(boolean zOnChainBlock);
 	
 	/**
 	 * What state is this in
