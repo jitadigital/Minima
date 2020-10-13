@@ -134,13 +134,7 @@ public class Coin implements Streamable {
 		JSONObject obj = new JSONObject();
 		
 		obj.put("coinid", mCoinID.toString());
-		
 		obj.put("address", mAddress.toString());
-		
-		//Get the MxAddress..
-		String mxaddr = Address.makeMinimaAddress(mAddress);
-		obj.put("mxaddress", mxaddr);
-		
 		obj.put("amount", mAmount.toString());
 		obj.put("tokenid", mTokenID.toString());
 		
