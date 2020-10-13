@@ -65,10 +65,6 @@ public class MiniData implements Streamable {
 		return new BigDecimal(mDataVal);
 	}
 	
-	public MiniNumber getDataValueMiniNumber() {
-		return new MiniNumber(mDataVal);
-	}
-	
 	@Override
 	public boolean equals(Object o) {
 		return isEqual((MiniData)o);
