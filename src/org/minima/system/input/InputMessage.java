@@ -23,6 +23,10 @@ public class InputMessage extends Message{
 	public InputMessage(String zInput, ResponseStream zResponseStream) {
 		super(InputHandler.INPUT_COMMAND);
 		
+		if(zInput.startsWith("coins")) {
+			MinimaLogger.log("Coins actions!");
+		}
+		
 		//Add the Input Message
 		addObject(InputHandler.INPUT_FUNCTION, zInput.trim());
 		
