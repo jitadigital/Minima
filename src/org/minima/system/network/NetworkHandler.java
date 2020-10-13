@@ -40,8 +40,7 @@ public class NetworkHandler extends SystemHandler{
 	
 	public static final String NETWORK_WEBPROXY 	= "NETWORK_WEBPROXY";
 	
-	public static final String NETWORK_WS_NOTIFY_MINIDAPP = "NETWORK_NOTIFY";
-	public static final String NETWORK_WS_NOTIFYALL 	  = "NETWORK_NOTIFY";
+	public static final String NETWORK_WS_NOTIFY 	= "NETWORK_NOTIFY";
 	
 	/**
 	 * The Main Minima Server
@@ -234,7 +233,7 @@ public class NetworkHandler extends SystemHandler{
 			//And finish up..
 			stopMessageProcessor();
 
-		}else if(zMessage.isMessageType(NETWORK_WS_NOTIFYALL)) {
+		}else if(zMessage.isMessageType(NETWORK_WS_NOTIFY)) {
 			//What is the message..
 			String json = zMessage.getString("message");
 					
@@ -242,18 +241,7 @@ public class NetworkHandler extends SystemHandler{
 			Message msg = new Message(WebSocketManager.WEBSOCK_SENDTOALL);
 			msg.addString("message", json);
 			mWebSocketManager.PostMessage(msg);
-		
-		}else if(zMessage.isMessageType(NETWORK_WS_NOTIFY_MINIDAPP)) {
-			//What is the message..
-			String json = zMessage.getString("message");
-			String minidapp = zMessage.getString("minidappid");
-					
-			//Notify users that something has changed,,.
-			Message msg = new Message(WebSocketManager.WEBSOCK_SEND);
-			msg.addString("message", json);
-			msg.addString("minidappid", minidapp);
-			mWebSocketManager.PostMessage(msg);
-		
+			
 		}else if(zMessage.isMessageType(NETWORK_WEBPROXY)) {
 //			//Connect to a web proxy and listen for RPC calls..
 //			String uuid 	= zMessage.getString("uuid");
