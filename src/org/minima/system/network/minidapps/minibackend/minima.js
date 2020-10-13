@@ -24,21 +24,14 @@ var MINIMA_USER_LISTEN   = [];
  * Main MINIMA Object for all interaction
  */
 var Minima = {
-	/**
-	 * Current Minima Block Height
-	 */
+	//Current Minima Block
 	block : 0,
 	
-	/** 
-	 * The TxPoWID of the current top block
-	 */
+	//TxPoWID of the current top block
 	txpowid : "0x00",
-
-	/** 
-	 * The Full TxPoW Top Block
-	 */
-	txpow : {},
-
+	
+	balance : {},
+	
 	//Show RPC commands
 	logging : false,
 
@@ -57,10 +50,10 @@ var Minima = {
 		}
 		
 		//Do the first call..
-		Minima.cmd("topblock;balance", function(json){
+		Minima.cmd("status;balance", function(json){
 			//Store this..
-		    Minima.block  = parseInt(json[0].response.txpow.header.block,10);
-		    Minima.txpow  = json[0].response.txpow;
+		    Minima.block   = parseInt(json[0].response.lastblock,10);
+		    Minima.txpowid = json[0].response.tip;
 		    
 			//Status is first..
 			Minima.balance = json[1].response.balance;
@@ -292,11 +285,6 @@ var Minima = {
  * Post a message to the internal JAVA runtime to process
  */
 function MinimaRPC(type, data, callback){
-	//Do we log it..
-	if(Minima.logging){
-        Minima.log("SERVICE_RPC : "+type+" "+data);	
-	}
-	
 	//Call the Java Function to deal with this..
 	MinimaJSBridge.post(type, data, callback);
 }
@@ -322,37 +310,21 @@ function MinimaBackEndListener(jmsg){
 	if(jmsg.event == "newblock"){
 		//Set the new status
 		Minima.block   = parseInt(jmsg.txpow.header.block,10);
-		Minima.txpow   = jmsg.txpow;
-		
-		//What is the info message
-		var info = { "txpow" : jmsg.txpow };
+		Minima.txpowid = jmsg.txpow.txpowid;
 		
 		//Post it
-		MinimaPostMessage("newblock", info);
+		MinimaPostMessage("newblock",jmsg.txpow);
 		
 	}else if(jmsg.event == "newtransaction"){
-		//What is the info message
-		var info = { "txpow" : jmsg.txpow, "relevant" : jmsg.relevant };
-		
 		//New Transaction
-		MinimaPostMessage("newtransaction", info);
-	
-	}else if(jmsg.event == "newtxpow"){
-		//What is the info message
-		var info = { "txpow" : jmsg.txpow };
-		
-		//New TxPoW
-		MinimaPostMessage("newtxpow", info);
+		MinimaPostMessage("newtransaction",jmsg.txpow);
 		
 	}else if(jmsg.event == "newbalance"){
 		//Set the New Balance
 		Minima.balance = jmsg.balance;
 		
-		//What is the info message
-		var info = { "balance" : jmsg.balance };
-		
 		//Post it..
-		MinimaPostMessage("newbalance", info);
+		MinimaPostMessage("newbalance",jmsg.balance);
 	
 	}else if(jmsg.event == "network"){
 		//What type of message is it..
