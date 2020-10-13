@@ -162,11 +162,16 @@ public class NET implements Runnable {
 			
 			try {
 				String result = RPCClient.sendGET(url);
-				resp.put("result", URLEncoder.encode(result,"UTF-8"));
+				
+				MinimaLogger.log(URLEncoder.encode(result,"UTF-8"));
+				
+				resp.put("result", result);
 				
 			} catch (IOException e) {
-				MinimaLogger.log("Error NET GET : "+url+" "+e);
 				resp.put("error", e.toString());
+				
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		
 		}else {
