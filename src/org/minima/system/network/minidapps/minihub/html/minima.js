@@ -240,15 +240,6 @@ var Minima = {
 			});
 		},
 		
-		//Save and Load as HEX.. Strings with 0x..
-		saveHEX : function(hextext, file,  callback) {
-			MinimaRPC("file","savehex "+file+" "+hextext,callback);
-		},
-		
-		loadHEX : function(file, callback) {
-			MinimaRPC("file","loadhex "+file,callback);
-		},
-		
 		//Copy file..
 		copy : function(file, newfile, callback) {
 			MinimaRPC("file","copy "+file+" "+newfile,callback);
