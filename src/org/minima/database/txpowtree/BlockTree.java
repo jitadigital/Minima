@@ -436,11 +436,16 @@ public class BlockTree {
 		//If nothing on chain return nothing
 		if(getChainRoot() == null) {return null;}
 				
+		return _recurseTree(zNodeAction, getChainRoot());
+	}
+	
+	
+	private BlockTreeNode _recurseTree(NodeAction zNodeAction, BlockTreeNode zStartNode) {
 		//Create a STACK..
 		NodeStack stack = new NodeStack();
 		
-		//Push the root on the stack
-		stack.push(getChainRoot());
+		//Push on the stack
+		stack.push(zStartNode);
 		
 		//Now cycle..
 		while(!stack.isEmpty()) {
