@@ -23,10 +23,6 @@ public class InputMessage extends Message{
 	public InputMessage(String zInput, ResponseStream zResponseStream) {
 		super(InputHandler.INPUT_COMMAND);
 		
-		if(zInput.startsWith("coins")) {
-			MinimaLogger.log("Coins actions!");
-		}
-		
 		//Add the Input Message
 		addObject(InputHandler.INPUT_FUNCTION, zInput.trim());
 		
@@ -34,7 +30,7 @@ public class InputMessage extends Message{
 		addObject(InputHandler.INPUT_RESPONSE, zResponseStream);
 	}
 	
-	/*public InputMessage(String zMessageType, String zInput, ResponseStream zResponseStream) {
+	public InputMessage(String zMessageType, String zInput, ResponseStream zResponseStream) {
 		super(zMessageType);
 		
 		//Add the Input Message
@@ -42,7 +38,7 @@ public class InputMessage extends Message{
 		
 		//Where do we send the response..
 		addObject(InputHandler.INPUT_RESPONSE, zResponseStream);
-	}*/
+	}
 	
 	
 	/**
