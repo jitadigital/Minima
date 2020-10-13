@@ -76,7 +76,6 @@ public class DAPPManager extends SystemHandler {
 	
 	//The List of Post messages for Replies..
 	Hashtable<String, Message> mReplyMessage;
-	long mLastReplySent = 0; 
 		
 	public DAPPManager(Main zMain) {
 		super(zMain, "DAPPMAnager");
@@ -471,14 +470,6 @@ public class DAPPManager extends SystemHandler {
 			//Create a unique REPLY ID
 			String replyid = MiniData.getRandomData(20).to0xString();
 			
-			//Check time..
-			long timenow = System.currentTimeMillis();
-			if(timenow - mLastReplySent > 10000) {
-				//Clear the whole thing..
-				mReplyMessage.clear();
-			}
-			mLastReplySent = timenow;
-			
 			//Put a link to this..
 			mReplyMessage.put(replyid, zMessage);
 			
@@ -510,7 +501,6 @@ public class DAPPManager extends SystemHandler {
 			
 			//Get the Message..
 			Message msg = mReplyMessage.remove(replyid);
-			mLastReplySent = System.currentTimeMillis();
 			
 			//Do we have it..
 			if(msg != null) {
