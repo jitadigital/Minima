@@ -262,6 +262,7 @@ public class DAPPManager extends SystemHandler {
 					}
 				}
 				
+				
 				//Open it up..
 				File conf    = new File(app,"minidapp.conf");
 				File backend = new File(app,"backend.js");
