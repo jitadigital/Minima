@@ -58,7 +58,7 @@ public class BlockTreeNode implements Comparable<BlockTreeNode> {
 	MMRSet mMMRSet = new MMRSet();
 	
 	/**
-	 * When Traversing.. remember which child was used last
+	 * When Traversing.. remeber which child was used last
 	 */
 	public int mTraversedChild = 0;
 	
