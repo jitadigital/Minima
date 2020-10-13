@@ -288,6 +288,9 @@ public class ConsensusNet extends ConsensusProcessor {
 						MinimaLogger.log("Requested "+reqtxn+" transaction in Initial Blocks..");	
 					}
 				}
+				
+				//NOW - post a notify message..
+				getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALSYNC));
 			}
 			
 		}else if(zMessage.isMessageType(CONSENSUS_NET_GREETING)) {
@@ -386,6 +389,9 @@ public class ConsensusNet extends ConsensusProcessor {
 				msg.addObject("netclient", client);
 				getConsensusHandler().PostMessage(msg);
 			}
+			
+			//NOW - post a notify message..
+			getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALSYNC));
 			
 			//Do a complete backup..
 			getConsensusHandler().PostTimerMessage(new TimerMessage(20000,ConsensusBackup.CONSENSUSBACKUP_BACKUP));

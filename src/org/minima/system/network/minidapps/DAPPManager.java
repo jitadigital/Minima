@@ -22,7 +22,6 @@ import java.util.zip.ZipInputStream;
 import org.minima.objects.base.MiniData;
 import org.minima.system.Main;
 import org.minima.system.brains.BackupManager;
-import org.minima.system.brains.ConsensusHandler;
 import org.minima.system.input.InputHandler;
 import org.minima.system.network.NetworkHandler;
 import org.minima.system.network.minidapps.comms.CommsManager;
@@ -81,7 +80,7 @@ public class DAPPManager extends MessageProcessor {
 	Hashtable<String, Message> mReplyMessage;
 	long mLastReplyUsed = 0; 
 		
-	public DAPPManager() {
+	public DAPPManager(Main zMain) {
 		super("DAPPMAnager");
 		
 		//Need access to this
@@ -244,7 +243,7 @@ public class DAPPManager extends MessageProcessor {
 							MinimaLogger.log("BackEndJS create for "+minidappid);
 							
 						} catch (Exception e) {
-							MinimaLogger.log("Error loading service.js for "+backend.getAbsolutePath()+" "+e);
+							MinimaLogger.log("Error loading service.js for "+backend.getAbsolutePath());
 						} 
 					}
 					
@@ -307,9 +306,6 @@ public class DAPPManager extends MessageProcessor {
 				MinimaLogger.log("MiniDAPP server error "+ e.toString());
 			}
 		
-			//We HAVE LIFT OFF!
-			Main.getMainHandler().getConsensusHandler().updateListeners(new Message(ConsensusHandler.CONSENSUS_NOTIFY_INITIALSYNC));
-			
 		}else if(zMessage.getMessageType().equals(DAPP_RELOAD)) {
 			//Recalculate the MINIDAPPS
 			recalculateMiniDAPPS();
