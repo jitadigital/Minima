@@ -1,10 +1,9 @@
-package org.minima.system.network.commands;
+package org.minima.system.network.minidapps.minilib;
 
 import java.util.StringTokenizer;
 
 import org.minima.system.input.InputHandler;
 import org.minima.system.input.InputMessage;
-import org.minima.system.network.minidapps.minilib.JSMiniLibUtil;
 import org.minima.utils.ResponseStream;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
@@ -12,7 +11,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
-public class CMD implements Runnable {
+public class Command implements Runnable {
 
 	//The Command to run
 	String mCommand;
@@ -25,11 +24,11 @@ public class CMD implements Runnable {
 	//The Final Result..
 	String mFinalResult = "";
 	
-	public CMD(String zCommand) {
+	public Command(String zCommand) {
 		this(zCommand,null,null,null);
 	}
 	
-	public CMD(String zCommand, Function zCallback, Context zContext, Scriptable zScope) {
+	public Command(String zCommand, Function zCallback, Context zContext, Scriptable zScope) {
 		mCommand  = zCommand;
 		mCallback = zCallback;
 		mContext  = zContext;
@@ -117,7 +116,7 @@ public class CMD implements Runnable {
 		//Now send the result back vis the callback..
 		if(mCallback != null) {
 			//Create a native JSON
-			Object json = JSMiniLibUtil.makeJSONObject(mFinalResult, mContext, mScope);
+			Object json = JSUtil.makeJSONObject(mFinalResult, mContext, mScope);
 			
 			//Make a function variable list
 			Object functionArgs[] = { json };
