@@ -34,7 +34,7 @@ public class WebSocketManager extends SystemHandler {
 	WebSocketServer mWebSockServer;
 	
 	//The List of all the currently connected MiniDAPPs..
-	Hashtable<String, MinimaWebSocket> mMinimaSockets;
+	Hashtable<String, MinimaWebSocket> mMininaSockets;
 	
 	/**
 	 * Main Constructor
@@ -45,7 +45,7 @@ public class WebSocketManager extends SystemHandler {
 	public WebSocketManager(Main zMain, int zPort) throws IOException {
 		super(zMain,"WEBSOCKETMANAGER");
 		
-		mMinimaSockets = new Hashtable<>();
+		mMininaSockets = new Hashtable<>();
 		
 		//Start a Server
 		try {
@@ -59,7 +59,7 @@ public class WebSocketManager extends SystemHandler {
 
 	public void stop() {
 		//Close all the clients..
-		Enumeration<MinimaWebSocket> clients = mMinimaSockets.elements();
+		Enumeration<MinimaWebSocket> clients = mMininaSockets.elements();
 		while(clients.hasMoreElements()) {
 			MinimaWebSocket client = clients.nextElement();
 			try {
@@ -87,7 +87,7 @@ public class WebSocketManager extends SystemHandler {
 			String UID = mws.getClientUID();
 			
 			//Add it to our list
-			mMinimaSockets.put(UID, mws);
+			mMininaSockets.put(UID, mws);
 			
 		}else if(zMessage.getMessageType().equals(WEBSOCK_ONCLOSE)) {
 			//New WS Socket..
@@ -95,7 +95,7 @@ public class WebSocketManager extends SystemHandler {
 			String UID = mws.getClientUID();
 			
 			//Remove from our List
-			mMinimaSockets.remove(UID);
+			mMininaSockets.remove(UID);
 			
 		}else if(zMessage.getMessageType().equals(WEBSOCK_ONEXCEPTION)) {
 			//New WS Socket..
@@ -103,7 +103,7 @@ public class WebSocketManager extends SystemHandler {
 			String UID = mws.getClientUID();
 			
 			//Remove from our List
-			mMinimaSockets.remove(UID);
+			mMininaSockets.remove(UID);
 		
 		}else if(zMessage.getMessageType().equals(WEBSOCK_ONMESSAGE)) {
 			//Get the client
@@ -155,31 +155,29 @@ public class WebSocketManager extends SystemHandler {
 			//Who to send the message to..
 			String miniid = zMessage.getString("minidappid");
 			
-			//Get the errors
-			ArrayList<String> remove = new ArrayList<>();
-			
 			//What to send..
 			String msg = zMessage.getString("message");
 			
 			//Send a message to one of the listeners..
-			Enumeration<MinimaWebSocket> clients = mMinimaSockets.elements();
+			Enumeration<MinimaWebSocket> clients = mMininaSockets.elements();
 			while(clients.hasMoreElements()) {
 				MinimaWebSocket client = clients.nextElement();
 				if(client.getMiniDAPPUID().equals(miniid)) {
 					try {
 						//Try and send the message..
 						client.send(msg);
+						MinimaLogger.log("WS_SEND FRONTEND MINIDAPP FOUND! "+zMessage);
+						
+						return;
 					}catch(Exception exc){
 						//Something wrong with this connection.. close..
-						remove.add(client.getClientUID());
+						mMininaSockets.remove(client.getClientUID());
+						break;
 					}
 				}
 			}
 			
-			//Any errors..
-			for(String errorclient : remove) {
-				mMinimaSockets.remove(errorclient);
-			}
+			MinimaLogger.log("WS_SEND FRONTEND MINIDAPP NOT FOUND! "+zMessage);
 			
 		}else if(zMessage.getMessageType().equals(WEBSOCK_SENDTOALL)) {
 			//What to send..
@@ -188,7 +186,7 @@ public class WebSocketManager extends SystemHandler {
 			//Get the errors
 			ArrayList<String> remove = new ArrayList<>();
 			
-			Enumeration<MinimaWebSocket> clients = mMinimaSockets.elements();
+			Enumeration<MinimaWebSocket> clients = mMininaSockets.elements();
 			while(clients.hasMoreElements()) {
 				MinimaWebSocket client = clients.nextElement();
 				try {
@@ -202,7 +200,7 @@ public class WebSocketManager extends SystemHandler {
 			
 			//Any errors..
 			for(String errorclient : remove) {
-				mMinimaSockets.remove(errorclient);
+				mMininaSockets.remove(errorclient);
 			}
 		}
 	}	
