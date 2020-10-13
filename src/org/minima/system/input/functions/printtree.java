@@ -21,6 +21,8 @@ public class printtree extends CommandFunction{
 			}else{
 				msg.addBoolean("auto", false);
 			}
+		}else {
+			msg.addBoolean("auto", false);
 		}
 		
 		//Print the Tree..
