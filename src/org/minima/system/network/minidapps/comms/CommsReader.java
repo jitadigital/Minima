@@ -23,7 +23,7 @@ import org.minima.utils.MinimaLogger;
 import org.minima.utils.ProtocolException;
 import org.minima.utils.messages.Message;
 
-public class CommsClientReader implements Runnable {
+public class CommsReader implements Runnable {
 	
 	/**
 	 * Netclient owner
@@ -35,48 +35,37 @@ public class CommsClientReader implements Runnable {
 	 * 
 	 * @param zCommsClient
 	 */
-	public CommsClientReader(CommsClient zCommsClient) {
+	public CommsReader(CommsClient zCommsClient) {
 		mCommsClient = zCommsClient;
 	}
 
 	@Override
 	public void run() {
-		DataInputStream input = null;
-		
 		try {
 			//Create an input stream
-			input = new DataInputStream(new BufferedInputStream(mCommsClient.getSocket().getInputStream()));
+			DataInputStream mInput = new DataInputStream(new BufferedInputStream(mCommsClient.getSocket().getInputStream()));
+			
+			//The Consensus
+//			ConsensusHandler consensus = mNetClient.getNetworkHandler().getMainHandler().getConsensusHandler();
 			
 			while(true) {
 				//Read in the MiniString
-				MiniString message = MiniString.ReadFromStream(input);
+				MiniString message = MiniString.ReadFromStream(mInput);
 				
 				//And Post it..
-				Message commsmessage = new Message(CommsClient.COMMSCLIENT_RECMESSAGE);
-				commsmessage.addObject("message", message);
+				Message commsmessage = new Message(CommsClient.COMMSCLIENT_MESSAGE);
+				commsmessage.addObject("msg", message);
 				mCommsClient.PostMessage(commsmessage);
 			}
 			
 		}catch(Exception exc) {
 			//General Exception	
 			MinimaLogger.log("COMMSCLIENTREADER ERROR.. "+exc);
-			//exc.printStackTrace();
-		
-		}finally {
-			if(input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			exc.printStackTrace();
 		}
 		
-		//Shut down the client..
-		mCommsClient.shutdown();
-		
-		MinimaLogger.log("COMMSCLIENT CLOSED");
+		//Tell the network Handler
+//		mNetClient.getNetworkHandler().PostMessage(new Message(NetworkHandler.NETWORK_CLIENTERROR).addObject("client", mNetClient));
 	}
 }
 
