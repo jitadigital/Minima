@@ -6,7 +6,6 @@ import org.minima.system.network.commands.FILE;
 import org.minima.system.network.commands.NET;
 import org.minima.system.network.commands.SQL;
 import org.minima.system.network.minidapps.DAPPManager;
-import org.minima.utils.MinimaLogger;
 import org.minima.utils.messages.Message;
 import org.mozilla.javascript.Function;
 
@@ -90,8 +89,6 @@ public class MinimaJSBridge {
         	finalresult = netcomm.getFinalResult();
 		}
 	    
-		//MinimaLogger.log("MinimaJSBridge RESULT "+finalresult);
-		
 		//Use the Callback ?
 		if(zCallback != null) {
 			//Create a native JSON
