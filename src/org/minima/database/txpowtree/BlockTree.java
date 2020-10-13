@@ -88,7 +88,7 @@ public class BlockTree {
 	 * @return
 	 */
 	public boolean addNode(BlockTreeNode zNode) {
-		//Do we have it allready.. 
+		//Do we have it allready.. DOUBLE check as this done already
 		BlockTreeNode exists = findNode(zNode.getTxPowID());
 		if(exists != null) {
 			//All ready in there..
