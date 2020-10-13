@@ -1,4 +1,4 @@
-package org.minima.system.network.minidapps.minihub.hexdata;
+package org.minima.system.network.minidapps.hexdata;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
