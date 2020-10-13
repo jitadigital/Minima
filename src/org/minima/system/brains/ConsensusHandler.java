@@ -197,15 +197,15 @@ public class ConsensusHandler extends SystemHandler {
 	 * @param zHardResetAllowed
 	 */
 	public void setHardResetAllowed(boolean zHardResetAllowed){
-		mConsensusNet.setAllowHardResest(zHardResetAllowed);
+		mConsensusNet.setHardResest(zHardResetAllowed);
 	}
 	
 	private MinimaDB getMainDB() {
 		return mMainDB;
 	}
 	
-	public void setInitialSyncComplete() {
-		mConsensusNet.initialSyncComplete();
+	public boolean isInitialSyncComplete() {
+		return mConsensusNet.mInitialSync;
 	}
 	
 	@Override
@@ -359,7 +359,6 @@ public class ConsensusHandler extends SystemHandler {
 			resp.put("automining", mining);			
 			InputHandler.endResponse(zMessage, true, "");
 		
-			//Boot-Strap Mining  
 		}else if ( zMessage.isMessageType(CONSENSUS_MINEBLOCK) ) {
 			//DEBUG MODE - only mine a block when you make a transction..
 			if(GlobalParams.MINIMA_ZERO_DIFF_BLK) {return;}

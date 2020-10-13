@@ -66,7 +66,7 @@ public class ConsensusNet extends ConsensusProcessor {
 		mInitialSync = false;
 	}
 	 
-	public void setAllowHardResest(boolean zHardResetAllowed) {
+	public void setHardResest(boolean zHardResetAllowed) {
 		mHardResetAllowed = zHardResetAllowed;
 	
 		if(!mHardResetAllowed) {
